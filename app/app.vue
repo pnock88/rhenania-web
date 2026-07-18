@@ -7,6 +7,7 @@
       <QuickLinks />
       <MatchCard />
       <NewsSection />
+      <StatsSection />
     </main>
   </div>
 </template>
