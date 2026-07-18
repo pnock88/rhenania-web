@@ -6,6 +6,7 @@
       <HomeHero />
       <QuickLinks />
       <MatchCard />
+      <NewsSection />
     </main>
   </div>
 </template>
