@@ -8,19 +8,11 @@ const navigation = [
   { label: 'Start', to: '/' },
   { label: 'Verein', to: '/verein' },
   { label: 'Mannschaften', to: '/mannschaften' },
-  { label: 'Aktuelles', to: '/news' },
+  { label: 'News', to: '/news' },
   { label: 'Spielplan', to: '/spielplan' },
   { label: 'Sponsoren', to: '/sponsoren' },
   { label: 'Kontakt', to: '/kontakt' },
 ]
-
-const closeMenu = () => {
-  isMenuOpen.value = false
-}
-
-const handleScroll = () => {
-  isScrolled.value = window.scrollY > 24
-}
 
 const isActive = (path: string) => {
   if (path === '/') {
@@ -30,199 +22,135 @@ const isActive = (path: string) => {
   return route.path.startsWith(path)
 }
 
-watch(
-  () => route.path,
-  () => {
-    closeMenu()
-  },
-)
+const closeMenu = () => {
+  isMenuOpen.value = false
+}
 
-watch(isMenuOpen, (isOpen) => {
-  if (!import.meta.client) {
-    return
+const handleScroll = () => {
+  if (import.meta.client) {
+    isScrolled.value = window.scrollY > 30
   }
-
-  document.body.style.overflow = isOpen ? 'hidden' : ''
-})
+}
 
 onMounted(() => {
   handleScroll()
-  window.addEventListener('scroll', handleScroll, { passive: true })
+  window.addEventListener('scroll', handleScroll)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', handleScroll)
-  document.body.style.overflow = ''
 })
 </script>
 
 <template>
   <header
-    class="fixed inset-x-0 top-0 z-50 text-white transition-all duration-300"
-    :class="[
-      isScrolled || isMenuOpen
-        ? 'border-b border-white/10 bg-slate-950/95 shadow-lg backdrop-blur-xl'
-        : 'border-b border-white/10 bg-slate-950/35 backdrop-blur-sm',
-    ]"
+    class="fixed inset-x-0 top-0 z-50 transition-all duration-300"
+    :class="
+      isScrolled
+        ? 'bg-slate-950/95 shadow-xl backdrop-blur-lg'
+        : 'bg-transparent'
+    "
   >
     <BaseContainer>
-      <div
-        class="flex items-center justify-between transition-all duration-300"
-        :class="isScrolled ? 'h-16' : 'h-20'"
-      >
+      <div class="flex h-20 items-center justify-between">
+
+        <!-- Logo -->
         <NuxtLink
           to="/"
-          class="flex min-w-0 items-center gap-3"
-          aria-label="SC Rhenania Hochdahl – Startseite"
-          @click="closeMenu"
+          class="flex items-center gap-3"
         >
-          <div
-            class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-blue-400 bg-white p-1 shadow-md"
+          <img
+            src="/images/logos/rhenania.png"
+            alt="SC Rhenania Hochdahl"
+            class="h-14 w-14 object-contain"
           >
-            <img
-              src="/images/logos/rhenania.png"
-              alt=""
-              class="h-full w-full object-contain"
-            >
-          </div>
 
-          <div class="min-w-0 leading-tight">
-            <p class="truncate font-black">
+          <div class="leading-tight text-white">
+            <p class="font-black">
               SC Rhenania
             </p>
 
-            <p class="truncate text-xs text-slate-300">
+            <p class="text-xs text-slate-300">
               Hochdahl 1925 e.V.
             </p>
           </div>
         </NuxtLink>
 
-        <nav
-          class="hidden lg:block"
-          aria-label="Hauptnavigation"
-        >
-          <ul class="flex items-center gap-6">
+        <!-- Desktop Navigation -->
+        <nav class="hidden lg:block">
+          <ul class="flex items-center gap-8">
             <li
               v-for="item in navigation"
               :key="item.to"
             >
               <NuxtLink
                 :to="item.to"
-                class="group relative block py-3 text-sm font-semibold transition"
+                class="relative font-semibold transition"
                 :class="
                   isActive(item.to)
-                    ? 'text-white'
-                    : 'text-slate-300 hover:text-white'
+                    ? 'text-blue-400'
+                    : 'text-white hover:text-blue-400'
                 "
               >
                 {{ item.label }}
 
                 <span
-                  class="absolute inset-x-0 bottom-0 h-0.5 origin-left bg-blue-400 transition-transform duration-300"
-                  :class="
-                    isActive(item.to)
-                      ? 'scale-x-100'
-                      : 'scale-x-0 group-hover:scale-x-100'
-                  "
+                  v-if="isActive(item.to)"
+                  class="absolute -bottom-2 left-0 h-0.5 w-full bg-blue-500"
                 />
               </NuxtLink>
             </li>
           </ul>
         </nav>
 
+        <!-- CTA -->
         <div class="hidden lg:block">
           <BaseButton to="/mitglied-werden">
             Mitglied werden
           </BaseButton>
         </div>
 
+        <!-- Mobile Button -->
         <button
-          type="button"
-          class="relative z-50 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-white/20 bg-white/10 transition hover:bg-white/20 lg:hidden"
-          :aria-expanded="isMenuOpen"
-          aria-controls="mobile-navigation"
-          :aria-label="isMenuOpen ? 'Menü schließen' : 'Menü öffnen'"
+          class="flex h-11 w-11 items-center justify-center rounded-lg border border-white/20 text-white lg:hidden"
           @click="isMenuOpen = !isMenuOpen"
         >
-          <svg
-            v-if="!isMenuOpen"
-            class="h-6 w-6"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            aria-hidden="true"
-          >
-            <path
-              stroke-linecap="round"
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-
-          <svg
-            v-else
-            class="h-6 w-6"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            aria-hidden="true"
-          >
-            <path
-              stroke-linecap="round"
-              d="M6 6l12 12M18 6 6 18"
-            />
-          </svg>
+          ☰
         </button>
+
       </div>
     </BaseContainer>
 
-    <Transition
-      enter-active-class="transition duration-300 ease-out"
-      enter-from-class="-translate-y-4 opacity-0"
-      enter-to-class="translate-y-0 opacity-100"
-      leave-active-class="transition duration-200 ease-in"
-      leave-from-class="translate-y-0 opacity-100"
-      leave-to-class="-translate-y-4 opacity-0"
+    <!-- Mobile Navigation -->
+    <div
+      v-if="isMenuOpen"
+      class="border-t border-white/10 bg-slate-950 lg:hidden"
     >
-      <nav
-        v-if="isMenuOpen"
-        id="mobile-navigation"
-        class="max-h-[calc(100vh-4rem)] overflow-y-auto border-t border-white/10 bg-slate-950 px-5 py-6 lg:hidden"
-        aria-label="Mobile Navigation"
-      >
-        <ul class="space-y-1">
-          <li
-            v-for="item in navigation"
-            :key="item.to"
-          >
-            <NuxtLink
-              :to="item.to"
-              class="flex items-center justify-between rounded-xl px-4 py-3.5 font-bold transition"
-              :class="
-                isActive(item.to)
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-200 hover:bg-white/10 hover:text-white'
-              "
-              @click="closeMenu"
+      <BaseContainer>
+        <nav class="py-5">
+          <ul class="space-y-2">
+            <li
+              v-for="item in navigation"
+              :key="item.to"
             >
-              {{ item.label }}
+              <NuxtLink
+                :to="item.to"
+                class="block rounded-lg px-4 py-3 text-white hover:bg-white/10"
+                @click="closeMenu"
+              >
+                {{ item.label }}
+              </NuxtLink>
+            </li>
+          </ul>
 
-              <span aria-hidden="true">
-                →
-              </span>
-            </NuxtLink>
-          </li>
-        </ul>
-
-        <BaseButton
-          to="/mitglied-werden"
-          class="mt-6 w-full"
-          @click="closeMenu"
-        >
-          Mitglied werden
-        </BaseButton>
-      </nav>
-    </Transition>
+          <BaseButton
+            to="/mitglied-werden"
+            class="mt-5 w-full"
+          >
+            Mitglied werden
+          </BaseButton>
+        </nav>
+      </BaseContainer>
+    </div>
   </header>
 </template>
