@@ -15,44 +15,40 @@ const buttons = [
     to: '/spielplan',
     variant: 'outline',
   },
-]
+] as const
 </script>
 
 <template>
-  <section class="relative min-h-[760px] overflow-hidden">
-
-    <!-- Hintergrund -->
+  <section
+    class="relative min-h-[700px] overflow-hidden bg-slate-950 pt-20 text-white lg:min-h-[760px]"
+  >
     <img
       src="/images/home/hero-team.jpg"
-      alt=""
-      class="absolute inset-0 h-full w-full object-cover"
+      alt="Fußballmannschaft auf dem Vereinsgelände"
+      class="absolute inset-0 h-full w-full object-cover object-center"
     >
 
-    <!-- Overlay -->
     <div
-      class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/75 to-slate-950/20"
+      class="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/65 to-slate-950/10"
     />
 
     <div
-      class="absolute inset-0 bg-black/20"
+      class="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-slate-950/20"
     />
 
     <BaseContainer>
-
       <div
-        class="relative z-10 flex min-h-[760px] items-center"
+        class="relative z-10 flex min-h-[620px] items-center py-20 lg:min-h-[680px]"
       >
-
         <div class="max-w-3xl">
-
           <p
-            class="mb-6 text-sm font-bold uppercase tracking-[0.35em] text-blue-400"
+            class="mb-5 text-sm font-extrabold uppercase tracking-[0.28em] text-blue-400"
           >
-            SC RHENANIA HOCHDAHL 1925 E.V.
+            SC Rhenania Hochdahl 1925 e.V.
           </p>
 
           <h1
-            class="text-6xl font-black leading-none text-white lg:text-8xl"
+            class="text-5xl font-black leading-[0.98] tracking-tight sm:text-6xl lg:text-7xl"
           >
             Mehr als Fußball.
 
@@ -60,43 +56,28 @@ const buttons = [
               Eine Gemeinschaft
             </span>
 
-            <span class="text-blue-500">
+            <span class="block text-blue-500">
               seit 1925.
             </span>
-
           </h1>
 
-          <p
-            class="mt-8 max-w-xl text-xl leading-8 text-slate-200"
-          >
-            Leidenschaft.
-            Zusammenhalt.
-            Gemeinschaft.
-
-            Seit fast 100 Jahren ist unser Verein ein Zuhause
-            für Fußballbegeisterte jeden Alters.
+          <p class="mt-7 max-w-xl text-lg leading-8 text-slate-200">
+            Leidenschaft, Teamgeist und Zusammenhalt – auf dem Platz und
+            darüber hinaus.
           </p>
 
-          <div
-            class="mt-12 flex flex-wrap gap-4"
-          >
-
+          <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <BaseButton
               v-for="button in buttons"
-              :key="button.label"
+              :key="button.to"
               :to="button.to"
               :variant="button.variant"
             >
               {{ button.label }}
             </BaseButton>
-
           </div>
-
         </div>
-
       </div>
-
     </BaseContainer>
-
   </section>
 </template>
