@@ -3,7 +3,9 @@
     class="flex min-h-screen items-center justify-center bg-slate-950 px-6"
   >
     <section class="text-center">
-      <p class="mb-3 text-sm font-bold uppercase tracking-[0.3em] text-blue-400">
+      <p
+        class="mb-3 text-sm font-bold uppercase tracking-[0.3em] text-blue-400"
+      >
         SC Rhenania Hochdahl
       </p>
 
@@ -15,11 +17,15 @@
         Unser neues Nuxt-Projekt läuft.
       </p>
 
-      <button
-        class="mt-8 rounded-full bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-500"
-      >
-        Projekt starten
-      </button>
+      <div class="mt-8 flex flex-wrap justify-center gap-4">
+        <BaseButton>
+          Mitglied werden
+        </BaseButton>
+
+        <BaseButton variant="outline">
+          Spielplan
+        </BaseButton>
+      </div>
     </section>
   </main>
 </template>
