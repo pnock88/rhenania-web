@@ -7,6 +7,7 @@
       <QuickLinks />
       <MatchCard />
       <NewsSection />
+      <TeamsSection />
       <StatsSection />
       <SponsorSection />
     </main>
