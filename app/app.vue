@@ -8,6 +8,8 @@
       <MatchCard />
       <NewsSection />
       <StatsSection />
+      <SponsorSection />
     </main>
+    <AppFooter />
   </div>
 </template>
