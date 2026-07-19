@@ -10,9 +10,9 @@ useSeoMeta({
   <main>
     <HomeHero />
     <QuickLinks />
-    <MatchCard />
+    <HomeMatches />
     <NewsSection />
-    <TeamsSection />
+    <!--<TeamsSection />-->
     <StatsSection />
     <SponsorSection />
   </main>

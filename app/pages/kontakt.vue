@@ -160,25 +160,46 @@ const subjectOptions = [
           </section>
 
           <section
-            class="flex min-h-72 items-center justify-center rounded-3xl border border-slate-200 bg-white p-7 text-center shadow-sm"
+            class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
           >
-            <div>
-              <p class="font-black text-slate-950">
-                Kartenansicht
-              </p>
+            <iframe
+              title="SC Rhenania Hochdahl"
+              class="h-[420px] w-full"
+              loading="lazy"
+              src="https://www.openstreetmap.org/export/embed.html?bbox=6.949715%2C51.204278%2C6.953715%2C51.208278&layer=mapnik&marker=51.206278%2C6.951715"
+              style="border:0"
+            />
 
-              <p class="mt-3 leading-7 text-slate-500">
-                Hier können wir später Google Maps oder OpenStreetMap
-                datenschutzfreundlich einbinden.
-              </p>
+            <div
+              class="relative z-10 border-t border-slate-200 bg-slate-50 p-6"
+            >
+              <div>
+                <h3 class="text-lg font-black text-slate-950">
+                  Sportanlage Grünstraße
+                </h3>
 
-              <BaseButton
-                to="https://maps.google.com"
-                external
-                class="mt-6"
-              >
-                Route planen
-              </BaseButton>
+                <p class="mt-1 text-slate-600">
+                  Grünstraße 17 · 40699 Erkrath
+                </p>
+              </div>
+
+              <div class="mt-5 flex flex-wrap gap-3">
+                <BaseButton
+                  to="https://www.openstreetmap.org/?mlat=51.206278&mlon=6.951715#map=17/51.206278/6.951715"
+                  external
+                  variant="outline"
+                  class="!border-slate-300 !bg-white !text-slate-950 hover:!border-blue-700 hover:!bg-blue-50 hover:!text-blue-700"
+                >
+                  OpenStreetMap
+                </BaseButton>
+
+                <BaseButton
+                  to="https://www.google.com/maps/dir/?api=1&destination=Grünstraße+17,+40699+Erkrath"
+                  external
+                >
+                  Route planen
+                </BaseButton>
+              </div>
             </div>
           </section>
         </aside>

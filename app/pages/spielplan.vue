@@ -1,46 +1,75 @@
 <script setup lang="ts">
-import type { MatchItem } from '~/data/matches'
-import { matches } from '~/data/matches'
+import type { StrapiMatch } from '~/types/strapi'
 
 useSeoMeta({
   title: 'Spielplan | SC Rhenania Hochdahl',
   description:
-    'Kommende Spiele und Ergebnisse der Herrenmannschaften des SC Rhenania Hochdahl.',
+    'Kommende Spiele und Ergebnisse der Mannschaften des SC Rhenania Hochdahl.',
 })
 
-type TeamFilter = 'all' | 'first' | 'second'
 type StatusFilter = 'upcoming' | 'finished'
+type TeamFilter = 'all' | string
+type VenueFilter = 'all' | 'home' | 'away'
 
-const teamFilter = ref<TeamFilter>('all')
 const statusFilter = ref<StatusFilter>('upcoming')
+const teamFilter = ref<TeamFilter>('all')
+const venueFilter = ref<VenueFilter>('all')
 
-const filteredMatches = computed<MatchItem[]>(() => {
-  return matches
+const {
+  data: matchResponse,
+  pending,
+  error,
+  refresh,
+} = useStrapiMatches()
+
+const matches = computed<StrapiMatch[]>(() => {
+  return matchResponse.value?.data ?? []
+})
+
+const teams = computed(() => {
+  const uniqueTeams = new Map<string, string>()
+
+  matches.value.forEach((match) => {
+    if (match.team?.documentId && match.team.name) {
+      uniqueTeams.set(match.team.documentId, match.team.name)
+    }
+  })
+
+  return Array.from(uniqueTeams, ([documentId, name]) => ({
+    documentId,
+    name,
+  }))
+})
+
+const filteredMatches = computed(() => {
+  return matches.value
     .filter((match) => {
       const matchesTeam =
         teamFilter.value === 'all'
-        || match.team === teamFilter.value
+        || match.team?.documentId === teamFilter.value
 
       const matchesStatus =
         statusFilter.value === 'upcoming'
-          ? match.status === 'upcoming'
-          : match.status === 'finished'
+          ? match.matchStatus === 'upcoming'
+            || match.matchStatus === 'postponed'
+          : match.matchStatus === 'finished'
+            || match.matchStatus === 'cancelled'
 
-      return matchesTeam && matchesStatus
+      const matchesVenue =
+        venueFilter.value === 'all'
+        || match.venueType === venueFilter.value
+
+      return matchesTeam && matchesStatus && matchesVenue
     })
     .sort((a, b) => {
-      const firstDate = new Date(a.date).getTime()
-      const secondDate = new Date(b.date).getTime()
+      const firstDate = new Date(a.dateTime).getTime()
+      const secondDate = new Date(b.dateTime).getTime()
 
       return statusFilter.value === 'upcoming'
         ? firstDate - secondDate
         : secondDate - firstDate
     })
 })
-
-const teamLabel = (team: MatchItem['team']) => {
-  return team === 'first' ? 'I. Mannschaft' : 'II. Mannschaft'
-}
 </script>
 
 <template>
@@ -49,17 +78,14 @@ const teamLabel = (team: MatchItem['team']) => {
       eyebrow="Spielbetrieb"
       title="Spiele und"
       highlight="Ergebnisse."
-      description="Alle kommenden Partien und vergangenen Ergebnisse unserer Herrenmannschaften."
+      description="Alle kommenden Partien und vergangenen Ergebnisse unserer Mannschaften."
       image="/images/teams/first-team.jpg"
     />
 
     <BaseSection class="bg-slate-50">
-      <div
-        class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7"
-      >
-        <div
-          class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between"
-        >
+      <!-- Filter -->
+      <BaseCard>
+        <div class="grid gap-6 lg:grid-cols-[1fr_auto_auto] lg:items-end">
           <div>
             <p class="text-sm font-bold text-slate-500">
               Mannschaft
@@ -80,29 +106,65 @@ const teamLabel = (team: MatchItem['team']) => {
               </button>
 
               <button
+                v-for="team in teams"
+                :key="team.documentId"
                 type="button"
                 class="rounded-full px-4 py-2 text-sm font-bold transition"
                 :class="
-                  teamFilter === 'first'
+                  teamFilter === team.documentId
                     ? 'bg-blue-700 text-white'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 "
-                @click="teamFilter = 'first'"
+                @click="teamFilter = team.documentId"
               >
-                I. Mannschaft
+                {{ team.name }}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <p class="text-sm font-bold text-slate-500">
+              Spielort
+            </p>
+
+            <div class="mt-3 flex rounded-xl bg-slate-100 p-1">
+              <button
+                type="button"
+                class="rounded-lg px-4 py-2 text-sm font-bold transition"
+                :class="
+                  venueFilter === 'all'
+                    ? 'bg-white text-blue-700 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-950'
+                "
+                @click="venueFilter = 'all'"
+              >
+                Alle
               </button>
 
               <button
                 type="button"
-                class="rounded-full px-4 py-2 text-sm font-bold transition"
+                class="rounded-lg px-4 py-2 text-sm font-bold transition"
                 :class="
-                  teamFilter === 'second'
-                    ? 'bg-blue-700 text-white'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  venueFilter === 'home'
+                    ? 'bg-white text-blue-700 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-950'
                 "
-                @click="teamFilter = 'second'"
+                @click="venueFilter = 'home'"
               >
-                II. Mannschaft
+                Heim
+              </button>
+
+              <button
+                type="button"
+                class="rounded-lg px-4 py-2 text-sm font-bold transition"
+                :class="
+                  venueFilter === 'away'
+                    ? 'bg-white text-blue-700 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-950'
+                "
+                @click="venueFilter = 'away'"
+              >
+                Auswärts
               </button>
             </div>
           </div>
@@ -141,127 +203,54 @@ const teamLabel = (team: MatchItem['team']) => {
             </div>
           </div>
         </div>
+      </BaseCard>
+
+      <!-- Ladezustand -->
+      <div
+        v-if="pending"
+        class="py-20 text-center"
+      >
+        <p class="font-bold text-slate-600">
+          Spiele werden geladen …
+        </p>
       </div>
 
+      <!-- Fehlerzustand -->
+      <BaseAlert
+        v-else-if="error"
+        variant="error"
+        class="mt-8"
+      >
+        <div
+          class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <span>
+            Der Spielplan konnte nicht geladen werden.
+          </span>
+
+          <button
+            type="button"
+            class="font-bold underline"
+            @click="refresh"
+          >
+            Erneut versuchen
+          </button>
+        </div>
+      </BaseAlert>
+
+      <!-- Spiele -->
       <div
-        v-if="filteredMatches.length"
+        v-else-if="filteredMatches.length"
         class="mt-8 space-y-5"
       >
-        <BaseCard
+        <MatchCard
           v-for="match in filteredMatches"
-          :key="match.id"
-          hover
-          :padded="false"
-        >
-          <div
-            class="flex flex-col gap-3 border-b border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div class="flex flex-wrap items-center gap-3">
-              <BaseBadge variant="secondary">
-                {{ teamLabel(match.team) }}
-              </BaseBadge>
-
-              <span class="text-sm font-semibold text-slate-500">
-                {{ match.competition }}
-              </span>
-            </div>
-
-            <BaseBadge
-              v-if="match.status === 'finished'"
-              variant="success"
-            >
-              Beendet
-            </BaseBadge>
-
-            <BaseBadge
-              v-else
-              variant="primary"
-            >
-              Bevorstehend
-            </BaseBadge>
-          </div>
-
-          <div class="grid gap-8 p-6 lg:grid-cols-[1fr_1.4fr_1fr] lg:items-center">
-            <div>
-              <p class="text-sm font-semibold text-slate-500">
-                Datum
-              </p>
-
-              <p class="mt-1 font-black text-slate-950">
-                {{ match.dateLabel }}
-              </p>
-
-              <p class="mt-1 text-sm text-slate-600">
-                {{ match.time }}
-              </p>
-            </div>
-
-            <div
-              class="grid grid-cols-[1fr_auto_1fr] items-center gap-4 text-center"
-            >
-              <div>
-                <img
-                  :src="match.homeTeam.logo"
-                  :alt="`Logo ${match.homeTeam.name}`"
-                  class="mx-auto h-16 w-16 rounded-full bg-white p-2 object-contain shadow-sm sm:h-20 sm:w-20"
-                >
-
-                <p class="mt-3 text-sm font-black text-slate-950 sm:text-base">
-                  {{ match.homeTeam.name }}
-                </p>
-              </div>
-
-              <div>
-                <div
-                  v-if="match.status === 'finished'"
-                  class="text-3xl font-black text-slate-950"
-                >
-                  {{ match.homeScore }} : {{ match.awayScore }}
-                </div>
-
-                <div
-                  v-else
-                  class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-950 text-sm font-black text-white"
-                >
-                  VS
-                </div>
-              </div>
-
-              <div>
-                <img
-                  :src="match.awayTeam.logo"
-                  :alt="`Logo ${match.awayTeam.name}`"
-                  class="mx-auto h-16 w-16 rounded-full bg-white p-2 object-contain shadow-sm sm:h-20 sm:w-20"
-                >
-
-                <p class="mt-3 text-sm font-black text-slate-950 sm:text-base">
-                  {{ match.awayTeam.name }}
-                </p>
-              </div>
-            </div>
-
-            <div class="lg:text-right">
-              <p class="text-sm font-semibold text-slate-500">
-                Spielort
-              </p>
-
-              <p class="mt-1 font-black text-slate-950">
-                {{ match.location }}
-              </p>
-
-              <BaseButton
-                v-if="match.status === 'upcoming'"
-                to="/kontakt"
-                variant="outline"
-                class="mt-5 border-slate-300 text-slate-950 hover:bg-slate-950 hover:text-white"
-              >
-                Anfahrt & Kontakt
-              </BaseButton>
-            </div>
-          </div>
-        </BaseCard>
+          :key="match.documentId"
+          :match="match"
+        />
       </div>
 
+      <!-- Keine Ergebnisse -->
       <div
         v-else
         class="mt-8 rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center"
@@ -271,7 +260,7 @@ const teamLabel = (team: MatchItem['team']) => {
         </h2>
 
         <p class="mt-3 text-slate-600">
-          Für diese Auswahl sind derzeit keine Spiele hinterlegt.
+          Für diese Auswahl sind derzeit keine Spiele veröffentlicht.
         </p>
       </div>
     </BaseSection>

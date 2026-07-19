@@ -147,3 +147,37 @@ export type StrapiBlock = {
   format?: 'ordered' | 'unordered'
   children: Array<StrapiTextNode | StrapiLinkNode | StrapiBlock>
 }
+
+export type MatchStatus =
+  | 'upcoming'
+  | 'finished'
+  | 'cancelled'
+  | 'postponed'
+
+export type StrapiMatch = {
+  id: number
+  documentId: string
+  competition: string
+  dateTime: string
+  location: string | null
+  matchStatus: MatchStatus
+  homeTeamName: string
+  awayTeamName: string
+  homeLogo: StrapiMedia | null
+  awayLogo: StrapiMedia | null
+  homeScore: number | null
+  awayScore: number | null
+  featured: boolean
+  team: StrapiTeam | null
+  publishedAt: string
+  createdAt: string
+  updatedAt: string
+  matchday: number | null
+  season: string | null
+  venueType: MatchVenueType
+}
+
+export type MatchVenueType =
+  | 'home'
+  | 'away'
+  | 'neutral'

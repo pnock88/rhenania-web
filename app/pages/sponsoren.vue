@@ -167,6 +167,149 @@ const submitForm = async () => {
       </template>
     </BasePageHero>
 
+    <!-- Partner aus Strapi -->
+    <BaseSection class="bg-white">
+      <div class="mx-auto max-w-3xl text-center">
+        <p
+          class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-700"
+        >
+          Danke für die Unterstützung
+        </p>
+
+        <h2
+          class="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl"
+        >
+          Unsere Partner
+        </h2>
+
+        <p class="mt-5 text-lg leading-8 text-slate-600">
+          Wir bedanken uns bei allen Unternehmen, die unseren Verein und unsere
+          Nachwuchsarbeit unterstützen.
+        </p>
+      </div>
+
+      <div
+        v-if="sponsorsPending"
+        class="py-16 text-center"
+      >
+        <p class="font-bold text-slate-600">
+          Partner werden geladen …
+        </p>
+      </div>
+
+      <BaseAlert
+        v-else-if="sponsorsError"
+        variant="error"
+        class="mt-10"
+      >
+        <div
+          class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <span>
+            Die Partner konnten nicht geladen werden.
+          </span>
+
+          <button
+            type="button"
+            class="font-bold underline"
+            @click="refreshSponsors"
+          >
+            Erneut versuchen
+          </button>
+        </div>
+      </BaseAlert>
+
+      <div
+        v-else-if="partners.length"
+        class="mt-12 space-y-16"
+      >
+        <section v-if="groupedSponsors.main.length">
+          <div
+            class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
+          >
+            <div>
+              <BaseBadge>
+                Premium
+              </BaseBadge>
+
+              <h3 class="mt-4 text-3xl font-black text-slate-950">
+                Hauptpartner
+              </h3>
+            </div>
+
+            <p class="max-w-xl text-slate-600">
+              Unsere wichtigsten Partner mit besonderem Engagement für den
+              gesamten Verein.
+            </p>
+          </div>
+
+          <div class="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <SponsorCard
+              v-for="sponsor in groupedSponsors.main"
+              :key="sponsor.documentId"
+              :sponsor="sponsor"
+            />
+          </div>
+        </section>
+
+        <section v-if="groupedSponsors.team.length">
+          <div>
+            <BaseBadge variant="secondary">
+              Mannschaften
+            </BaseBadge>
+
+            <h3 class="mt-4 text-3xl font-black text-slate-950">
+              Teampartner
+            </h3>
+          </div>
+
+          <div class="mt-7 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+            <SponsorCard
+              v-for="sponsor in groupedSponsors.team"
+              :key="sponsor.documentId"
+              :sponsor="sponsor"
+            />
+          </div>
+        </section>
+
+        <section v-if="groupedSponsors.club.length">
+          <div>
+            <BaseBadge variant="secondary">
+              Gemeinschaft
+            </BaseBadge>
+
+            <h3 class="mt-4 text-3xl font-black text-slate-950">
+              Vereinspartner
+            </h3>
+          </div>
+
+          <div
+            class="mt-7 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-3"
+          >
+            <SponsorCard
+              v-for="sponsor in groupedSponsors.club"
+              :key="sponsor.documentId"
+              :sponsor="sponsor"
+            />
+          </div>
+        </section>
+      </div>
+
+      <div
+        v-else
+        class="mt-12 rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center"
+      >
+        <h3 class="text-2xl font-black text-slate-950">
+          Noch keine Partner veröffentlicht
+        </h3>
+
+        <p class="mt-3 text-slate-600">
+          Sobald Sponsoren in Strapi veröffentlicht wurden, erscheinen sie
+          hier.
+        </p>
+      </div>
+    </BaseSection>
+
     <!-- Vorteile -->
     <BaseSection class="bg-white">
       <div class="mx-auto max-w-3xl text-center">
@@ -295,148 +438,7 @@ const submitForm = async () => {
       </div>
     </BaseSection>
 
-    <!-- Partner aus Strapi -->
-    <BaseSection class="bg-white">
-      <div class="mx-auto max-w-3xl text-center">
-        <p
-          class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-700"
-        >
-          Danke für die Unterstützung
-        </p>
-
-        <h2
-          class="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl"
-        >
-          Unsere Partner
-        </h2>
-
-        <p class="mt-5 text-lg leading-8 text-slate-600">
-          Wir bedanken uns bei allen Unternehmen, die unseren Verein und unsere
-          Nachwuchsarbeit unterstützen.
-        </p>
-      </div>
-
-      <div
-        v-if="sponsorsPending"
-        class="py-16 text-center"
-      >
-        <p class="font-bold text-slate-600">
-          Partner werden geladen …
-        </p>
-      </div>
-
-      <BaseAlert
-        v-else-if="sponsorsError"
-        variant="error"
-        class="mt-10"
-      >
-        <div
-          class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <span>
-            Die Partner konnten nicht geladen werden.
-          </span>
-
-          <button
-            type="button"
-            class="font-bold underline"
-            @click="refreshSponsors"
-          >
-            Erneut versuchen
-          </button>
-        </div>
-      </BaseAlert>
-
-      <div
-        v-else-if="partners.length"
-        class="mt-12 space-y-16"
-      >
-        <section v-if="groupedSponsors.main.length">
-          <div
-            class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
-          >
-            <div>
-              <BaseBadge>
-                Premium
-              </BaseBadge>
-
-              <h3 class="mt-4 text-3xl font-black text-slate-950">
-                Hauptpartner
-              </h3>
-            </div>
-
-            <p class="max-w-xl text-slate-600">
-              Unsere wichtigsten Partner mit besonderem Engagement für den
-              gesamten Verein.
-            </p>
-          </div>
-
-          <div class="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            <SponsorCard
-              v-for="sponsor in groupedSponsors.main"
-              :key="sponsor.documentId"
-              :sponsor="sponsor"
-            />
-          </div>
-        </section>
-
-        <section v-if="groupedSponsors.team.length">
-          <div>
-            <BaseBadge variant="secondary">
-              Mannschaften
-            </BaseBadge>
-
-            <h3 class="mt-4 text-3xl font-black text-slate-950">
-              Teampartner
-            </h3>
-          </div>
-
-          <div class="mt-7 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            <SponsorCard
-              v-for="sponsor in groupedSponsors.team"
-              :key="sponsor.documentId"
-              :sponsor="sponsor"
-            />
-          </div>
-        </section>
-
-        <section v-if="groupedSponsors.club.length">
-          <div>
-            <BaseBadge variant="secondary">
-              Gemeinschaft
-            </BaseBadge>
-
-            <h3 class="mt-4 text-3xl font-black text-slate-950">
-              Vereinspartner
-            </h3>
-          </div>
-
-          <div
-            class="mt-7 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6"
-          >
-            <SponsorCard
-              v-for="sponsor in groupedSponsors.club"
-              :key="sponsor.documentId"
-              :sponsor="sponsor"
-            />
-          </div>
-        </section>
-      </div>
-
-      <div
-        v-else
-        class="mt-12 rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center"
-      >
-        <h3 class="text-2xl font-black text-slate-950">
-          Noch keine Partner veröffentlicht
-        </h3>
-
-        <p class="mt-3 text-slate-600">
-          Sobald Sponsoren in Strapi veröffentlicht wurden, erscheinen sie
-          hier.
-        </p>
-      </div>
-    </BaseSection>
+    
 
     <!-- Anfrageformular -->
     <BaseSection

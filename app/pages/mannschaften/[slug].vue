@@ -13,6 +13,66 @@ const {
 
 const team = computed(() => response.value?.data?.[0] ?? null)
 
+const teamDocumentId = computed(() => team.value?.documentId)
+
+const {
+  data: matchResponse,
+  pending: matchesPending,
+  error: matchesError,
+  refresh: refreshMatches,
+  execute: loadMatches,
+} = useStrapiTeamMatches(teamDocumentId)
+
+watch(
+  teamDocumentId,
+  async (documentId) => {
+    if (documentId) {
+      await loadMatches()
+    }
+  },
+  {
+    immediate: true,
+  },
+)
+
+const teamMatches = computed(() => {
+  return matchResponse.value?.data ?? []
+})
+
+const upcomingMatches = computed(() => {
+  return teamMatches.value
+    .filter(match =>
+      match.matchStatus === 'upcoming'
+      || match.matchStatus === 'postponed',
+    )
+    .sort(
+      (a, b) =>
+        new Date(a.dateTime).getTime()
+        - new Date(b.dateTime).getTime(),
+    )
+})
+
+const finishedMatches = computed(() => {
+  return teamMatches.value
+    .filter(match =>
+      match.matchStatus === 'finished'
+      || match.matchStatus === 'cancelled',
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.dateTime).getTime()
+        - new Date(a.dateTime).getTime(),
+    )
+})
+
+const visibleUpcomingMatches = computed(() => {
+  return upcomingMatches.value.slice(0, 3)
+})
+
+const visibleFinishedMatches = computed(() => {
+  return finishedMatches.value.slice(0, 3)
+})
+
 watchEffect(() => {
   if (!pending.value && !error.value && !team.value) {
     throw createError({
@@ -327,7 +387,131 @@ useSeoMeta({
                 :coach="coach"
             />
         </div>
-        </BaseSection>
+      </BaseSection>
+
+      <BaseSection class="bg-white">
+        <div
+          class="mb-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"
+        >
+          <div>
+            <p
+              class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-700"
+            >
+              Spielbetrieb
+            </p>
+
+            <h2
+              class="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl"
+            >
+              Spiele der {{ team.name }}
+            </h2>
+
+            <p class="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
+              Kommende Partien und die letzten Ergebnisse dieser Mannschaft.
+            </p>
+          </div>
+
+          <BaseButton
+            to="/spielplan"
+            variant="outline"
+            class="border-slate-300 text-slate-950 hover:bg-slate-950 hover:text-white"
+          >
+            Gesamten Spielplan öffnen
+          </BaseButton>
+        </div>
+
+        <div
+          v-if="matchesPending"
+          class="py-16 text-center"
+        >
+          <p class="font-bold text-slate-600">
+            Spiele werden geladen …
+          </p>
+        </div>
+
+        <BaseAlert
+          v-else-if="matchesError"
+          variant="error"
+        >
+          <div
+            class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <span>
+              Die Spiele konnten nicht geladen werden.
+            </span>
+
+            <button
+              type="button"
+              class="font-bold underline"
+              @click="refreshMatches"
+            >
+              Erneut versuchen
+            </button>
+          </div>
+        </BaseAlert>
+
+        <div
+          v-else-if="
+            visibleUpcomingMatches.length
+            || visibleFinishedMatches.length
+          "
+          class="space-y-14"
+        >
+          <section v-if="visibleUpcomingMatches.length">
+            <div class="mb-6 flex items-center justify-between gap-4">
+              <h3 class="text-2xl font-black text-slate-950">
+                Kommende Spiele
+              </h3>
+
+              <BaseBadge>
+                {{ upcomingMatches.length }}
+              </BaseBadge>
+            </div>
+
+            <div class="space-y-5">
+              <MatchCard
+                v-for="match in visibleUpcomingMatches"
+                :key="match.documentId"
+                :match="match"
+              />
+            </div>
+          </section>
+
+          <section v-if="visibleFinishedMatches.length">
+            <div class="mb-6 flex items-center justify-between gap-4">
+              <h3 class="text-2xl font-black text-slate-950">
+                Letzte Ergebnisse
+              </h3>
+
+              <BaseBadge variant="secondary">
+                {{ finishedMatches.length }}
+              </BaseBadge>
+            </div>
+
+            <div class="space-y-5">
+              <MatchCard
+                v-for="match in visibleFinishedMatches"
+                :key="match.documentId"
+                :match="match"
+              />
+            </div>
+          </section>
+        </div>
+
+        <div
+          v-else
+          class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center"
+        >
+          <h3 class="text-2xl font-black text-slate-950">
+            Noch keine Spiele veröffentlicht
+          </h3>
+
+          <p class="mt-3 text-slate-600">
+            Sobald Spiele dieser Mannschaft in Strapi veröffentlicht sind,
+            erscheinen sie hier.
+          </p>
+        </div>
+      </BaseSection>
 
       <section class="bg-blue-700 py-16 text-white md:py-20">
         <BaseContainer>
