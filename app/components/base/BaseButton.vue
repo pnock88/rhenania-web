@@ -6,6 +6,7 @@ interface Props {
   variant?: ButtonVariant
   external?: boolean
   disabled?: boolean
+  type?: 'button' | 'submit' | 'reset'
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -13,6 +14,7 @@ const props = withDefaults(defineProps<Props>(), {
   variant: 'primary',
   external: false,
   disabled: false,
+  type: 'button',
 })
 
 const variantClasses: Record<ButtonVariant, string> = {
@@ -48,6 +50,7 @@ const component = computed(() => {
     :rel="external ? 'noopener noreferrer' : undefined"
     class="inline-flex min-h-12 items-center justify-center rounded-lg px-6 py-3 text-sm font-bold uppercase tracking-wide transition duration-200 focus-visible:outline-2 focus-visible:outline-offset-4 disabled:cursor-not-allowed disabled:opacity-50"
     :class="variantClasses[variant]"
+    :type="!to ? type : undefined"
   >
     <slot />
   </component>

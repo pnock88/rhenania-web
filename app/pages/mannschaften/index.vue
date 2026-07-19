@@ -1,378 +1,258 @@
 <script setup lang="ts">
+import type {
+  StrapiTeam,
+  TeamSection,
+} from '~/types/strapi'
+
 useSeoMeta({
   title: 'Mannschaften | SC Rhenania Hochdahl',
   description:
-    'Alle Mannschaften des SC Rhenania Hochdahl – Herren, Jugend, Alte Herren und weitere Teams.',
+    'Alle Mannschaften des SC Rhenania Hochdahl – Senioren, Nachwuchs und Freizeitfußball.',
 })
 
-type Team = {
-  name: string
-  category: string
+const {
+  data: teamResponse,
+  pending,
+  error,
+  refresh,
+} = useStrapiTeams()
+
+const teams = computed<StrapiTeam[]>(() => {
+  return teamResponse.value?.data ?? []
+})
+
+type TeamGroup = {
+  section: TeamSection
+  eyebrow: string
+  title: string
   description: string
-  image: string
-  to: string
-  training?: string
-  league?: string
+  teams: StrapiTeam[]
 }
 
-const seniorTeams: Team[] = [
+const groupDescriptions: Record<
+  TeamSection,
   {
-    name: 'I. Mannschaft',
-    category: 'Herren',
+    eyebrow: string
+    title: string
+    description: string
+  }
+> = {
+  Senioren: {
+    eyebrow: 'Erwachsenenfußball',
+    title: 'Senioren',
     description:
-      'Unsere erste Herrenmannschaft steht für ambitionierten Fußball, Teamgeist und eine starke Verbindung zum Verein.',
-    image: '/images/teams/first-team.jpg',
-    to: '/mannschaften/erste',
-    training: 'Dienstag und Donnerstag',
-    league: 'Kreisliga A',
+      'Unsere Herren-, Damen- und Altherrenmannschaften vertreten den Verein im regelmäßigen Spielbetrieb.',
   },
-  {
-    name: 'II. Mannschaft',
-    category: 'Herren',
+
+  Nachwuchs: {
+    eyebrow: 'Jugendfußball',
+    title: 'Nachwuchs',
     description:
-      'Unsere zweite Mannschaft verbindet sportlichen Ehrgeiz mit Gemeinschaft und unterstützt den gesamten Seniorenbereich.',
-    image: '/images/teams/second-team.jpg',
-    to: '/mannschaften/zweite',
-    training: 'Dienstag und Donnerstag',
-    league: 'Kreisliga C',
+      'Bei unseren Junioren, Juniorinnen und Soccer Girls stehen altersgerechte Förderung, Gemeinschaft und Freude am Fußball im Mittelpunkt.',
   },
+
+  Freizeit: {
+    eyebrow: 'Gemeinsam aktiv',
+    title: 'Freizeitfußball',
+    description:
+      'Unsere Freizeitangebote richten sich an alle, die ohne Leistungsdruck gemeinsam Fußball spielen möchten.',
+  },
+}
+
+const sectionOrder: TeamSection[] = [
+  'Senioren',
+  'Nachwuchs',
+  'Freizeit',
 ]
 
-const otherTeams: Team[] = [
-  {
-    name: 'Jugend',
-    category: 'Nachwuchs',
-    description:
-      'Von den Bambini bis zur A-Jugend fördern wir unsere Nachwuchsspieler altersgerecht und mit viel Freude am Fußball.',
-    image: '/images/teams/youth.jpg',
-    to: '/jugend',
-  },
-  {
-    name: 'Alte Herren',
-    category: 'Tradition',
-    description:
-      'Fußball, Freundschaft und Vereinsleben stehen bei unseren Alten Herren gleichermaßen im Mittelpunkt.',
-    image: '/images/teams/old-boys.jpg',
-    to: '/mannschaften/alte-herren',
-  },
-  {
-    name: 'Frauen und Mädchen',
-    category: 'Fußball für alle',
-    description:
-      'Unser Angebot für fußballbegeisterte Frauen und Mädchen soll nachhaltig weiterentwickelt werden.',
-    image: '/images/teams/women.jpg',
-    to: '/mannschaften/frauen',
-  },
-]
+const teamGroups = computed<TeamGroup[]>(() => {
+  return sectionOrder
+    .map((section) => {
+      const information = groupDescriptions[section]
 
-const benefits = [
-  {
-    title: 'Qualifiziertes Training',
-    description:
-      'Unsere Trainerinnen und Trainer fördern sportliche und persönliche Entwicklung.',
-  },
-  {
-    title: 'Starke Gemeinschaft',
-    description:
-      'Bei uns zählen Zusammenhalt, Respekt und gegenseitige Unterstützung.',
-  },
-  {
-    title: 'Für jedes Alter',
-    description:
-      'Vom ersten Ballkontakt bis zum Seniorenfußball bieten wir passende Mannschaften.',
-  },
-]
+      return {
+        section,
+        eyebrow: information.eyebrow,
+        title: information.title,
+        description: information.description,
+        teams: teams.value.filter(team => team.section === section),
+      }
+    })
+    .filter(group => group.teams.length > 0)
+})
+
+const hasTeams = computed(() => teamGroups.value.length > 0)
 </script>
 
 <template>
   <main>
-    <!-- Seiten-Hero -->
-    <section
-      class="relative overflow-hidden bg-slate-950 pb-24 pt-36 text-white md:pb-32 md:pt-44"
+    <BasePageHero
+      eyebrow="Unsere Teams"
+      title="Gemeinsam auf"
+      highlight="dem Platz."
+      description="Entdecke alle Mannschaften des SC Rhenania Hochdahl und finde das passende Team für dich."
+      image="/images/teams/first-team.jpg"
     >
-      <img
-        src="/images/teams/first-team.jpg"
-        alt=""
-        class="absolute inset-0 h-full w-full object-cover opacity-30"
+      <template #actions>
+        <BaseButton to="/probetraining">
+          Probetraining vereinbaren
+        </BaseButton>
+
+        <BaseButton
+          to="/kontakt"
+          variant="outline"
+        >
+          Ansprechpartner
+        </BaseButton>
+      </template>
+    </BasePageHero>
+
+    <!-- Ladezustand -->
+    <BaseSection
+      v-if="pending"
+      class="min-h-[400px] bg-white"
+    >
+      <div class="py-20 text-center">
+        <p class="font-bold text-slate-600">
+          Mannschaften werden geladen …
+        </p>
+      </div>
+    </BaseSection>
+
+    <!-- Fehlerzustand -->
+    <BaseSection
+      v-else-if="error"
+      class="min-h-[400px] bg-white"
+    >
+      <BaseAlert variant="error">
+        <div
+          class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <span>
+            Die Mannschaften konnten nicht geladen werden.
+          </span>
+
+          <button
+            type="button"
+            class="font-bold underline"
+            @click="refresh"
+          >
+            Erneut versuchen
+          </button>
+        </div>
+      </BaseAlert>
+    </BaseSection>
+
+    <!-- Dynamische Mannschaftsgruppen -->
+    <template v-else-if="hasTeams">
+      <BaseSection
+        v-for="(group, index) in teamGroups"
+        :key="group.section"
+        :class="index % 2 === 0 ? 'bg-white' : 'bg-slate-50'"
       >
+        <div
+          class="mb-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"
+        >
+          <div class="max-w-3xl">
+            <p
+              class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-700"
+            >
+              {{ group.eyebrow }}
+            </p>
 
+            <h2
+              class="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl"
+            >
+              {{ group.title }}
+            </h2>
+
+            <p class="mt-5 text-lg leading-8 text-slate-600">
+              {{ group.description }}
+            </p>
+          </div>
+
+          <BaseBadge variant="secondary">
+            {{ group.teams.length }}
+            {{ group.teams.length === 1 ? 'Mannschaft' : 'Mannschaften' }}
+          </BaseBadge>
+        </div>
+
+        <div
+          class="grid gap-7 md:grid-cols-2"
+          :class="
+            group.teams.length >= 3
+              ? 'xl:grid-cols-3'
+              : 'xl:grid-cols-2'
+          "
+        >
+          <TeamCard
+            v-for="team in group.teams"
+            :key="team.documentId"
+            :team="team"
+          />
+        </div>
+      </BaseSection>
+    </template>
+
+    <!-- Keine Mannschaften -->
+    <BaseSection
+      v-else
+      class="min-h-[400px] bg-white"
+    >
       <div
-        class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-slate-950/40"
-      />
+        class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center"
+      >
+        <h2 class="text-2xl font-black text-slate-950">
+          Noch keine Mannschaften veröffentlicht
+        </h2>
 
+        <p class="mx-auto mt-3 max-w-xl leading-7 text-slate-600">
+          Sobald Mannschaften in Strapi veröffentlicht und einem Bereich
+          zugeordnet wurden, erscheinen sie hier.
+        </p>
+      </div>
+    </BaseSection>
+
+    <!-- Abschluss-CTA -->
+    <section class="bg-blue-700 py-16 text-white md:py-20">
       <BaseContainer>
-        <div class="relative max-w-4xl">
-          <p
-            class="text-sm font-extrabold uppercase tracking-[0.3em] text-blue-400"
-          >
-            Unsere Teams
-          </p>
+        <div
+          class="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between"
+        >
+          <div class="max-w-3xl">
+            <p
+              class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-200"
+            >
+              Teil der Rhenania werden
+            </p>
 
-          <h1
-            class="mt-5 text-5xl font-black leading-tight tracking-tight sm:text-6xl lg:text-7xl"
-          >
-            Gemeinsam auf
-            <span class="block text-blue-500">
-              dem Platz.
-            </span>
-          </h1>
+            <h2 class="mt-4 text-4xl font-black sm:text-5xl">
+              Noch nicht das passende Team gefunden?
+            </h2>
 
-          <p class="mt-7 max-w-2xl text-lg leading-8 text-slate-200">
-            Entdecke die Mannschaften des SC Rhenania Hochdahl und finde das
-            passende Team für dich.
-          </p>
+            <p class="mt-5 text-lg leading-8 text-blue-100">
+              Melde dich bei uns. Gemeinsam finden wir die passende
+              Mannschaft oder das geeignete Fußballangebot.
+            </p>
+          </div>
 
-          <div class="mt-9 flex flex-col gap-3 sm:flex-row">
-            <BaseButton to="/probetraining">
-              Probetraining vereinbaren
+          <div class="flex shrink-0 flex-col gap-3 sm:flex-row">
+            <BaseButton
+              to="/probetraining"
+              variant="secondary"
+            >
+              Probetraining anfragen
             </BaseButton>
 
             <BaseButton
               to="/kontakt"
               variant="outline"
             >
-              Ansprechpartner
+              Kontakt aufnehmen
             </BaseButton>
           </div>
         </div>
       </BaseContainer>
     </section>
-
-    <!-- Herren -->
-    <BaseSection class="bg-white">
-      <div class="mb-10 max-w-3xl">
-        <p
-          class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-700"
-        >
-          Senioren
-        </p>
-
-        <h2
-          class="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl"
-        >
-          Unsere Herrenmannschaften
-        </h2>
-
-        <p class="mt-5 text-lg leading-8 text-slate-600">
-          Zwei Mannschaften, ein Verein: Unsere Senioren vertreten Rhenania
-          Hochdahl im regelmäßigen Spielbetrieb.
-        </p>
-      </div>
-
-      <div class="grid gap-7 lg:grid-cols-2">
-        <article
-          v-for="team in seniorTeams"
-          :key="team.to"
-          class="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
-        >
-          <NuxtLink
-            :to="team.to"
-            class="block"
-          >
-            <div class="relative aspect-[16/10] overflow-hidden bg-slate-200">
-              <img
-                :src="team.image"
-                :alt="team.name"
-                class="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-              >
-
-              <div
-                class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"
-              />
-
-              <span
-                class="absolute left-5 top-5 rounded-full bg-blue-700 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white"
-              >
-                {{ team.category }}
-              </span>
-
-              <h3
-                class="absolute bottom-5 left-5 right-5 text-3xl font-black text-white"
-              >
-                {{ team.name }}
-              </h3>
-            </div>
-
-            <div class="p-6 sm:p-8">
-              <p class="leading-7 text-slate-600">
-                {{ team.description }}
-              </p>
-
-              <dl class="mt-6 grid gap-4 border-t border-slate-200 pt-6 sm:grid-cols-2">
-                <div>
-                  <dt class="text-sm font-semibold text-slate-500">
-                    Liga
-                  </dt>
-
-                  <dd class="mt-1 font-bold text-slate-950">
-                    {{ team.league }}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt class="text-sm font-semibold text-slate-500">
-                    Training
-                  </dt>
-
-                  <dd class="mt-1 font-bold text-slate-950">
-                    {{ team.training }}
-                  </dd>
-                </div>
-              </dl>
-
-              <span
-                class="mt-7 inline-flex items-center gap-2 font-bold text-blue-700"
-              >
-                Zur Mannschaft
-
-                <span
-                  class="transition-transform duration-300 group-hover:translate-x-1"
-                  aria-hidden="true"
-                >
-                  →
-                </span>
-              </span>
-            </div>
-          </NuxtLink>
-        </article>
-      </div>
-    </BaseSection>
-
-    <!-- Weitere Mannschaften -->
-    <BaseSection class="bg-slate-50">
-      <div
-        class="mb-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"
-      >
-        <div>
-          <p
-            class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-700"
-          >
-            Der ganze Verein
-          </p>
-
-          <h2
-            class="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl"
-          >
-            Weitere Mannschaften
-          </h2>
-        </div>
-
-        <NuxtLink
-          to="/kontakt"
-          class="font-bold text-blue-700 transition hover:text-blue-500"
-        >
-          Team nicht gefunden? →
-        </NuxtLink>
-      </div>
-
-      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <NuxtLink
-          v-for="team in otherTeams"
-          :key="team.to"
-          :to="team.to"
-          class="group relative min-h-[420px] overflow-hidden rounded-3xl bg-slate-900 shadow-lg"
-        >
-          <img
-            :src="team.image"
-            :alt="team.name"
-            class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
-          >
-
-          <div
-            class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/35 to-transparent"
-          />
-
-          <div class="absolute inset-x-0 bottom-0 p-7 text-white">
-            <p
-              class="text-sm font-bold uppercase tracking-[0.2em] text-blue-300"
-            >
-              {{ team.category }}
-            </p>
-
-            <h3 class="mt-3 text-3xl font-black">
-              {{ team.name }}
-            </h3>
-
-            <p class="mt-3 leading-7 text-slate-200">
-              {{ team.description }}
-            </p>
-
-            <div class="mt-6 inline-flex items-center gap-2 font-bold">
-              Mehr erfahren
-
-              <span
-                class="transition-transform duration-300 group-hover:translate-x-1"
-                aria-hidden="true"
-              >
-                →
-              </span>
-            </div>
-          </div>
-
-          <div
-            class="absolute bottom-0 left-0 h-1 w-0 bg-blue-500 transition-all duration-500 group-hover:w-full"
-          />
-        </NuxtLink>
-      </div>
-    </BaseSection>
-
-    <!-- Vorteile -->
-    <BaseSection class="bg-white">
-      <div class="mx-auto max-w-3xl text-center">
-        <p
-          class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-700"
-        >
-          Teil der Rhenania werden
-        </p>
-
-        <h2
-          class="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl"
-        >
-          Dein Platz in unserem Verein
-        </h2>
-
-        <p class="mt-5 text-lg leading-8 text-slate-600">
-          Ob Anfänger, erfahrener Spieler oder Wiedereinsteiger: Bei uns steht
-          die Freude am Fußball im Mittelpunkt.
-        </p>
-      </div>
-
-      <div class="mt-12 grid gap-6 md:grid-cols-3">
-        <article
-          v-for="benefit in benefits"
-          :key="benefit.title"
-          class="rounded-2xl border border-slate-200 bg-slate-50 p-7"
-        >
-          <div
-            class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-700 text-xl font-black text-white"
-            aria-hidden="true"
-          >
-            ✓
-          </div>
-
-          <h3 class="mt-6 text-xl font-black text-slate-950">
-            {{ benefit.title }}
-          </h3>
-
-          <p class="mt-3 leading-7 text-slate-600">
-            {{ benefit.description }}
-          </p>
-        </article>
-      </div>
-
-      <div class="mt-12 flex flex-col justify-center gap-3 sm:flex-row">
-        <BaseButton to="/probetraining">
-          Probetraining vereinbaren
-        </BaseButton>
-
-        <BaseButton
-          to="/mitglied-werden"
-          variant="outline"
-          class="border-slate-300 text-slate-950 hover:bg-slate-950 hover:text-white"
-        >
-          Mitglied werden
-        </BaseButton>
-      </div>
-    </BaseSection>
   </main>
 </template>

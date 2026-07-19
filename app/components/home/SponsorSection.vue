@@ -1,36 +1,12 @@
 <script setup lang="ts">
-const sponsors = [
-  {
-    name: 'Sponsor 1',
-    logo: '/images/sponsors/sponsor-1.png',
-    url: '#',
-  },
-  {
-    name: 'Sponsor 2',
-    logo: '/images/sponsors/sponsor-2.png',
-    url: '#',
-  },
-  {
-    name: 'Sponsor 3',
-    logo: '/images/sponsors/sponsor-3.png',
-    url: '#',
-  },
-  {
-    name: 'Sponsor 4',
-    logo: '/images/sponsors/sponsor-4.png',
-    url: '#',
-  },
-  {
-    name: 'Sponsor 5',
-    logo: '/images/sponsors/sponsor-5.png',
-    url: '#',
-  },
-  {
-    name: 'Sponsor 6',
-    logo: '/images/sponsors/sponsor-6.png',
-    url: '#',
-  },
-]
+const {
+  data: response,
+  pending,
+  error,
+  refresh,
+} = useStrapiSponsors()
+
+const sponsors = computed(() => response.value?.data ?? [])
 </script>
 
 <template>
@@ -54,20 +30,55 @@ const sponsors = [
       </p>
     </div>
 
-    <div class="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-      <a
-        v-for="sponsor in sponsors"
-        :key="sponsor.name"
-        :href="sponsor.url"
-        :aria-label="sponsor.name"
-        class="group flex min-h-32 items-center justify-center rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg"
+    <div
+      v-if="pending"
+      class="py-16 text-center"
+    >
+      <p class="font-bold text-slate-600">
+        Partner werden geladen …
+      </p>
+    </div>
+
+    <BaseAlert
+      v-else-if="error"
+      variant="error"
+      class="mt-10"
+    >
+      <div
+        class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
       >
-        <img
-          :src="sponsor.logo"
-          :alt="sponsor.name"
-          class="max-h-16 w-full object-contain grayscale opacity-70 transition duration-300 group-hover:grayscale-0 group-hover:opacity-100"
+        <span>
+          Die Partner konnten nicht geladen werden.
+        </span>
+
+        <button
+          type="button"
+          class="font-bold underline"
+          @click="refresh"
         >
-      </a>
+          Erneut versuchen
+        </button>
+      </div>
+    </BaseAlert>
+
+    <div
+      v-else-if="sponsors.length"
+      class="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6"
+    >
+      <SponsorCard
+        v-for="sponsor in sponsors.slice(0, 6)"
+        :key="sponsor.documentId"
+        :sponsor="sponsor"
+      />
+    </div>
+
+    <div
+      v-else
+      class="mt-12 rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center"
+    >
+      <p class="font-bold text-slate-700">
+        Aktuell sind noch keine Partner veröffentlicht.
+      </p>
     </div>
 
     <div class="mt-10 flex justify-center">

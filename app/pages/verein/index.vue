@@ -57,43 +57,13 @@ const boardMembers = [
 <template>
   <main>
     <!-- Seiten-Hero -->
-    <section
-      class="relative overflow-hidden bg-slate-950 pb-24 pt-36 text-white md:pb-32 md:pt-44"
-    >
-      <img
-        src="/images/home/hero-team.jpg"
-        alt=""
-        class="absolute inset-0 h-full w-full object-cover opacity-35"
-      >
-
-      <div
-        class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-slate-950/45"
-      />
-
-      <BaseContainer>
-        <div class="relative max-w-4xl">
-          <p
-            class="text-sm font-extrabold uppercase tracking-[0.3em] text-blue-400"
-          >
-            Unser Verein
-          </p>
-
-          <h1
-            class="mt-5 text-5xl font-black leading-tight tracking-tight sm:text-6xl lg:text-7xl"
-          >
-            Mehr als Fußball
-            <span class="block text-blue-500">
-              seit 1925.
-            </span>
-          </h1>
-
-          <p class="mt-7 max-w-2xl text-lg leading-8 text-slate-200">
-            Der SC Rhenania Hochdahl steht für sportliche Leidenschaft,
-            nachhaltige Nachwuchsarbeit und eine starke Gemeinschaft.
-          </p>
-        </div>
-      </BaseContainer>
-    </section>
+    <BasePageHero
+      eyebrow="Unser Verein"
+      title="Mehr als Fußball"
+      highlight="seit 1925."
+      description="Der SC Rhenania Hochdahl steht für sportliche Leidenschaft, nachhaltige Nachwuchsarbeit und eine starke Gemeinschaft."
+      image="/images/home/hero-team.jpg"
+    />
 
     <!-- Geschichte -->
     <BaseSection class="bg-white">
@@ -178,78 +148,11 @@ const boardMembers = [
       </div>
 
       <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <article
-          v-for="value in values"
-          :key="value.title"
-          class="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
-        >
-          <div
-            class="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-100 text-blue-700"
-          >
-            <svg
-              v-if="value.icon === 'heart'"
-              class="h-7 w-7"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              aria-hidden="true"
-            >
-              <path
-                d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"
-              />
-            </svg>
-
-            <svg
-              v-else-if="value.icon === 'ball'"
-              class="h-7 w-7"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              aria-hidden="true"
-            >
-              <circle cx="12" cy="12" r="9" />
-              <path d="m9 8 3-2 3 2-1 4h-4z" />
-              <path d="m10 12-3 2M14 12l3 2M9 8 7 6M15 8l2-2M9 18l1-3M15 18l-1-3" />
-            </svg>
-
-            <svg
-              v-else-if="value.icon === 'shield'"
-              class="h-7 w-7"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              aria-hidden="true"
-            >
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
-              <path d="m9 12 2 2 4-4" />
-            </svg>
-
-            <svg
-              v-else
-              class="h-7 w-7"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              aria-hidden="true"
-            >
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-            </svg>
-          </div>
-
-          <h3 class="mt-6 text-xl font-black text-slate-950">
-            {{ value.title }}
-          </h3>
-
-          <p class="mt-3 leading-7 text-slate-600">
-            {{ value.description }}
-          </p>
-        </article>
+        <ContactPersonCard
+          v-for="contact in contacts"
+          :key="contact.email"
+          v-bind="contact"
+        />
       </div>
     </BaseSection>
 
@@ -281,36 +184,11 @@ const boardMembers = [
       </div>
 
       <div class="grid gap-6 md:grid-cols-3">
-        <article
+        <ContactPersonCard
           v-for="member in boardMembers"
           :key="member.email"
-          class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
-        >
-          <div class="aspect-[4/3] bg-slate-200">
-            <img
-              :src="member.image"
-              :alt="member.name"
-              class="h-full w-full object-cover"
-            >
-          </div>
-
-          <div class="p-6">
-            <h3 class="text-xl font-black text-slate-950">
-              {{ member.name }}
-            </h3>
-
-            <p class="mt-1 font-semibold text-blue-700">
-              {{ member.role }}
-            </p>
-
-            <a
-              :href="`mailto:${member.email}`"
-              class="mt-5 inline-flex text-sm font-bold text-slate-600 transition hover:text-blue-700"
-            >
-              {{ member.email }}
-            </a>
-          </div>
-        </article>
+          v-bind="member"
+        />
       </div>
     </BaseSection>
 

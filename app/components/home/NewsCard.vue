@@ -1,51 +1,55 @@
 <script setup lang="ts">
-interface Props {
-  title: string
-  excerpt: string
-  image: string
-  category: string
-  date: string
-  to: string
-}
+  import type { StrapiArticle } from '~/types/strapi'
 
-defineProps<Props>()
+  defineProps<{
+    article: StrapiArticle
+  }>()
+
+  const { getStrapiMediaUrl } = useStrapiMedia()
 </script>
 
 <template>
-  <article
-    class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+  <BaseCard
+    hover
+    :padded="false"
+    class="group h-full"
   >
     <NuxtLink
-      :to="to"
-      class="block"
+      :to="`/news/${article.slug}`"
+      class="flex h-full flex-col"
     >
       <div class="relative aspect-[16/10] overflow-hidden bg-slate-200">
         <img
-          :src="image"
-          :alt="title"
+          :src="getStrapiMediaUrl(article.card ?? article.image)"
+          :alt="article.title"
+          loading="lazy"
           class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
         >
 
-        <span
-          class="absolute left-4 top-4 rounded-full bg-blue-700 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white"
-        >
-          {{ category }}
-        </span>
+        <div class="absolute left-4 top-4">
+          <BaseBadge>
+            {{ article.category }}
+          </BaseBadge>
+        </div>
       </div>
 
-      <div class="p-6">
-        <time class="text-sm font-medium text-slate-500">
-          {{ date }}
+      <div class="flex flex-1 flex-col p-6">
+        <time
+          v-if="article.date"
+          :datetime="article.date"
+          class="text-sm font-medium text-slate-500"
+        >
+          {{ formatArticleDate(article.date) }}
         </time>
 
         <h3
           class="mt-3 text-xl font-black leading-tight text-slate-950 transition group-hover:text-blue-700"
         >
-          {{ title }}
+          {{ article.title }}
         </h3>
 
-        <p class="mt-3 line-clamp-3 leading-7 text-slate-600">
-          {{ excerpt }}
+        <p class="mt-3 flex-1 leading-7 text-slate-600">
+          {{ article.excerpt }}
         </p>
 
         <span
@@ -62,5 +66,5 @@ defineProps<Props>()
         </span>
       </div>
     </NuxtLink>
-  </article>
+  </BaseCard>
 </template>

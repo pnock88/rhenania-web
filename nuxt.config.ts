@@ -14,6 +14,12 @@ export default defineNuxtConfig({
     },
   ],
 
+  runtimeConfig: {
+    public: {
+      strapiUrl: 'http://localhost:1338',
+    },
+  },
+
   vite: {
     plugins: [
       tailwindcss(),

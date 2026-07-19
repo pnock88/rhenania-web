@@ -1,61 +1,13 @@
 <script setup lang="ts">
-type NewsItem = {
-  title: string
-  excerpt: string
-  image: string
-  category: string
-  date: string
-  to: string
-}
+  const {
+    featuredArticle: featuredNews,
+    homepageArticles: newsItems,
+    pending,
+    error,
+    refresh,
+  } = useNewsData()
 
-const featuredNews: NewsItem = {
-  title: 'Aktionstag ein voller Erfolg',
-  excerpt:
-    'Tolles Wetter, viele Besucher und jede Menge Fußball: Unser Aktionstag war ein voller Erfolg für den gesamten Verein.',
-  image: '/images/news/news-1.jpg',
-  category: 'Verein',
-  date: '18. Mai 2025',
-  to: '/news/aktionstag',
-}
-
-const newsItems: NewsItem[] = [
-  {
-    title: 'Stadtmeisterschaft gewonnen',
-    excerpt:
-      'Unsere erste Mannschaft sichert sich nach einer starken Saison den Titel.',
-    image: '/images/news/news-2.jpg',
-    category: '1. Mannschaft',
-    date: '12. Mai 2025',
-    to: '/news/stadtmeisterschaft',
-  },
-  {
-    title: 'Neue Trikots für die E-Jugend',
-    excerpt:
-      'Unsere E-Jugend bedankt sich bei ihrem Sponsor für die neuen Trikots.',
-    image: '/images/news/news-3.jpg',
-    category: 'Jugend',
-    date: '8. Mai 2025',
-    to: '/news/neue-trikots',
-  },
-  {
-    title: 'Mitgliederversammlung 2025',
-    excerpt:
-      'Alle Informationen und Ergebnisse der diesjährigen Mitgliederversammlung.',
-    image: '/images/news/news-4.jpg',
-    category: 'Verein',
-    date: '3. Mai 2025',
-    to: '/news/mitgliederversammlung',
-  },
-  {
-    title: 'Trainerinnen und Trainer gesucht',
-    excerpt:
-      'Wir suchen Verstärkung für unsere Jugendmannschaften und freuen uns auf dich.',
-    image: '/images/news/news-5.jpg',
-    category: 'Ehrenamt',
-    date: '28. April 2025',
-    to: '/news/trainer-gesucht',
-  },
-]
+  const { getStrapiMediaUrl } = useStrapiMedia()
 </script>
 
 <template>
@@ -82,36 +34,89 @@ const newsItems: NewsItem[] = [
         class="inline-flex items-center gap-2 font-bold text-blue-700 transition hover:text-blue-500"
       >
         Zur News-Übersicht
-        <span aria-hidden="true">→</span>
+
+        <span aria-hidden="true">
+          →
+        </span>
       </NuxtLink>
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-[1.15fr_1fr]">
+    <!-- Ladezustand -->
+    <div
+      v-if="pending"
+      class="py-20 text-center"
+    >
+      <p class="font-bold text-slate-600">
+        Neuigkeiten werden geladen …
+      </p>
+    </div>
+
+    <!-- Fehlerzustand -->
+    <BaseAlert
+      v-else-if="error"
+      variant="error"
+      role="alert"
+    >
+      <div
+        class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <span>
+          Die Neuigkeiten konnten nicht geladen werden.
+        </span>
+
+        <button
+          type="button"
+          class="font-bold underline"
+          @click="refresh"
+        >
+          Erneut versuchen
+        </button>
+      </div>
+    </BaseAlert>
+
+    <!-- News -->
+    <div
+      v-else-if="featuredNews"
+      class="grid gap-6 lg:grid-cols-[1.15fr_1fr]"
+    >
       <!-- Hauptmeldung -->
-      <article
-        class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+      <BaseCard
+        hover
+        :padded="false"
+        class="group h-full"
       >
         <NuxtLink
-          :to="featuredNews.to"
-          class="block h-full"
+          :to="`/news/${featuredNews.slug}`"
+          class="flex h-full flex-col"
         >
-          <div class="relative aspect-[16/10] overflow-hidden bg-slate-200">
+          <div
+            class="relative aspect-[16/10] overflow-hidden bg-slate-200"
+          >
             <img
-              :src="featuredNews.image"
+              :src="
+                getStrapiMediaUrl(
+                  featuredNews.card ?? featuredNews.image,
+                )
+              "
               :alt="featuredNews.title"
+              loading="lazy"
               class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
             >
 
-            <span
-              class="absolute left-5 top-5 rounded-full bg-blue-700 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white"
-            >
-              {{ featuredNews.category }}
-            </span>
+            <div class="absolute left-5 top-5">
+              <BaseBadge>
+                {{ featuredNews.category }}
+              </BaseBadge>
+            </div>
           </div>
 
-          <div class="p-6 sm:p-8">
-            <time class="text-sm font-medium text-slate-500">
-              {{ featuredNews.date }}
+          <div class="flex flex-1 flex-col p-6 sm:p-8">
+            <time
+              v-if="featuredNews.date"
+              :datetime="featuredNews.date"
+              class="text-sm font-medium text-slate-500"
+            >
+              {{ formatArticleDate(featuredNews.date) }}
             </time>
 
             <h3
@@ -120,7 +125,7 @@ const newsItems: NewsItem[] = [
               {{ featuredNews.title }}
             </h3>
 
-            <p class="mt-4 leading-7 text-slate-600">
+            <p class="mt-4 flex-1 leading-7 text-slate-600">
               {{ featuredNews.excerpt }}
             </p>
 
@@ -128,8 +133,9 @@ const newsItems: NewsItem[] = [
               class="mt-6 inline-flex items-center gap-2 text-sm font-bold text-blue-700"
             >
               Weiterlesen
+
               <span
-                class="transition group-hover:translate-x-1"
+                class="transition-transform duration-300 group-hover:translate-x-1"
                 aria-hidden="true"
               >
                 →
@@ -137,63 +143,30 @@ const newsItems: NewsItem[] = [
             </span>
           </div>
         </NuxtLink>
-      </article>
+      </BaseCard>
 
-      <!-- Kleine Meldungen -->
+      <!-- Weitere Meldungen -->
       <div class="grid gap-5 sm:grid-cols-2">
-        <article
-          v-for="item in newsItems"
-          :key="item.to"
-          class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"
-        >
-          <NuxtLink
-            :to="item.to"
-            class="block h-full"
-          >
-            <div class="relative aspect-[16/9] overflow-hidden bg-slate-200">
-              <img
-                :src="item.image"
-                :alt="item.title"
-                class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-              >
-
-              <span
-                class="absolute left-3 top-3 rounded-full bg-blue-700 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white"
-              >
-                {{ item.category }}
-              </span>
-            </div>
-
-            <div class="p-5">
-              <time class="text-xs font-medium text-slate-500">
-                {{ item.date }}
-              </time>
-
-              <h3
-                class="mt-2 text-lg font-black leading-tight text-slate-950 transition group-hover:text-blue-700"
-              >
-                {{ item.title }}
-              </h3>
-
-              <p class="mt-3 text-sm leading-6 text-slate-600">
-                {{ item.excerpt }}
-              </p>
-
-              <span
-                class="mt-4 inline-flex items-center gap-2 text-sm font-bold text-blue-700"
-              >
-                Weiterlesen
-                <span
-                  class="transition group-hover:translate-x-1"
-                  aria-hidden="true"
-                >
-                  →
-                </span>
-              </span>
-            </div>
-          </NuxtLink>
-        </article>
+        <NewsCard
+          v-for="article in newsItems"
+          :key="article.documentId"
+          :article="article"
+        />
       </div>
+    </div>
+
+    <!-- Keine News vorhanden -->
+    <div
+      v-else
+      class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center"
+    >
+      <h3 class="text-2xl font-black text-slate-950">
+        Noch keine Neuigkeiten
+      </h3>
+
+      <p class="mt-3 text-slate-600">
+        Sobald Artikel in Strapi veröffentlicht sind, erscheinen sie hier.
+      </p>
     </div>
   </BaseSection>
 </template>
