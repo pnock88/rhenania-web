@@ -29,8 +29,13 @@ export const useNewsData = () => {
     return remainingArticles.value.slice(0, 4)
   })
 
+  const latestArticles = computed<StrapiArticle[]>(() => {
+    return articles.value.slice(0, 20)
+  })
+
   return {
     articles,
+    latestArticles,
     featuredArticle,
     remainingArticles,
     homepageArticles,
@@ -38,4 +43,5 @@ export const useNewsData = () => {
     error,
     refresh,
   }
+
 }

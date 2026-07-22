@@ -143,46 +143,83 @@ useSeoMeta({
       </header>
 
       <BaseSection class="bg-white">
-        <div class="mx-auto max-w-4xl">
-          <figure
+        <div
+          class="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start xl:gap-14"
+        >
+          <!-- Artikelbild links -->
+          <div
             v-if="article.image"
-            class="flex justify-center rounded-3xl bg-slate-100 p-8 shadow-xl"
+            class="lg:sticky lg:top-28"
           >
-            <img
-              :src="getStrapiMediaUrl(article.image)"
-              :alt="article.title"
-              class="h-auto max-w-full object-contain"
+            <figure
+              class="flex justify-center"
             >
-          </figure>
-
-          <div
-            v-if="article.content"
-            class="article-content mt-10"
-            v-html="renderMarkdown(article.content)"
-          />
-
-          <div
-            v-else
-            class="mt-10 rounded-2xl bg-slate-50 p-6 text-slate-600"
-          >
-            Für diesen Artikel wurde noch kein ausführlicher Inhalt
-            hinterlegt.
+              <img
+                :src="getStrapiMediaUrl(article.image)"
+                :alt="article.title"
+                class="h-auto max-w-full object-contain rounded-3xl"
+              >
+            </figure>
           </div>
 
-          <div
-            class="mt-12 flex flex-col gap-5 border-t border-slate-200 pt-8 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <NuxtLink
-              to="/news"
-              class="inline-flex items-center gap-2 font-bold text-blue-700 transition hover:text-blue-500"
-            >
-              <span aria-hidden="true">←</span>
-              Alle Neuigkeiten
-            </NuxtLink>
+          <!-- Artikelinhalt rechts -->
+          <div :class="{ 'lg:col-span-2 mx-auto max-w-4xl': !article.image }">
+            <div class="mt-8 flex flex-wrap items-center gap-3">
+              <BaseBadge>
+                {{ article.category }}
+              </BaseBadge>
 
-            <span class="text-sm text-slate-500">
-              SC Rhenania Hochdahl 1925 e.V.
-            </span>
+              <time
+                v-if="article.date"
+                :datetime="article.date"
+                class="text-sm font-semibold text-grey-700"
+              >
+                {{ formatArticleDate(article.date) }}
+              </time>
+            </div>
+
+            <div
+              class="mt-3 text-2xl font-bold"
+            >
+              {{ article.title }}
+            </div>
+
+            <p
+              v-if="article.excerpt"
+              class="article-content my-2"
+            >
+              {{ article.excerpt }}
+            </p>
+
+            <div
+              v-if="article.content"
+              class="article-content text-sm leading-5"
+              v-html="renderMarkdown(article.content)"
+            />
+
+            <div
+              v-else
+              class="rounded-2xl bg-slate-50 p-6 text-slate-600"
+            >
+              Für diesen Artikel wurde noch kein ausführlicher Inhalt
+              hinterlegt.
+            </div>
+
+            <div
+              class="mt-12 flex flex-col gap-5 border-t border-slate-200 pt-8 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <NuxtLink
+                to="/news"
+                class="inline-flex items-center gap-2 font-bold text-blue-700 transition hover:text-blue-500"
+              >
+                <span aria-hidden="true">←</span>
+                Alle Neuigkeiten
+              </NuxtLink>
+
+              <span class="text-sm text-slate-500">
+                SC Rhenania Hochdahl 1925 e.V.
+              </span>
+            </div>
           </div>
         </div>
       </BaseSection>
@@ -193,8 +230,8 @@ useSeoMeta({
 <style scoped>
 .article-content {
   color: #334155;
-  font-size: 1.125rem;
-  line-height: 2;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 .article-content :deep(p) {

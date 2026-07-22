@@ -123,7 +123,7 @@ const closeAll = () => {
               <span
                 class="text-slate-400 transition"
                 :class="{
-                  'rotate-180 bg-blue-700 text-white': isOpen(entry.id),
+                  'rotate-180 bg-blue-900 text-white': isOpen(entry.id),
                 }"
                 aria-hidden="true"
               >

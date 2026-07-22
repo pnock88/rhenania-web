@@ -1,21 +1,80 @@
 <script setup lang="ts">
-  useSeoMeta({
-    title: 'Aktuelles | SC Rhenania Hochdahl',
-    description:
-      'Neuigkeiten, Spielberichte und Informationen aus dem Vereinsleben des SC Rhenania Hochdahl.',
+import type { StrapiArticle } from '~/types/strapi'
+
+useSeoMeta({
+  title: 'Aktuelles | SC Rhenania Hochdahl',
+  description:
+    'Neuigkeiten, Spielberichte und Informationen aus dem Vereinsleben des SC Rhenania Hochdahl.',
+})
+
+const {
+  articles,
+  pending,
+  error,
+  refresh,
+} = useNewsData()
+
+const currentYear = new Date().getFullYear()
+const selectedYear = ref(currentYear)
+
+const getArticleYear = (
+  article: StrapiArticle,
+): number | null => {
+  if (!article.date) {
+    return null
+  }
+
+  const parsedDate = new Date(article.date)
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return null
+  }
+
+  return parsedDate.getFullYear()
+}
+
+const availableYears = computed<number[]>(() => {
+  const years = new Set<number>()
+
+  articles.value.forEach((article) => {
+    const year = getArticleYear(article)
+
+    if (year) {
+      years.add(year)
+    }
   })
 
-  const {
-    featuredArticle: featuredNews,
-    remainingArticles: remainingNews,
-    pending,
-    error,
-    refresh,
-  } = useNewsData()
+  // Das aktuelle Jahr bleibt immer als Filter sichtbar,
+  // auch wenn noch keine Meldung veröffentlicht wurde.
+  years.add(currentYear)
 
-  const { getStrapiMediaUrl } = useStrapiMedia()
+  return Array.from(years).sort((a, b) => b - a)
+})
+
+const filteredArticles = computed<StrapiArticle[]>(() => {
+  return articles.value
+    .filter(article => getArticleYear(article) === selectedYear.value)
+    .sort((a, b) => {
+      const firstDate = a.date
+        ? new Date(a.date).getTime()
+        : 0
+
+      const secondDate = b.date
+        ? new Date(b.date).getTime()
+        : 0
+
+      return secondDate - firstDate
+    })
+})
+
+const resultLabel = computed(() => {
+  const count = filteredArticles.value.length
+
+  return count === 1
+    ? '1 Meldung'
+    : `${count} Meldungen`
+})
 </script>
-
 
 <template>
   <main>
@@ -26,6 +85,7 @@
       image="/images/news/news-1.jpg"
     />
 
+    <!-- Ladezustand -->
     <BaseSection
       v-if="pending"
       class="bg-white"
@@ -37,12 +97,15 @@
       </div>
     </BaseSection>
 
+    <!-- Fehlerzustand -->
     <BaseSection
       v-else-if="error"
       class="bg-white"
     >
       <BaseAlert variant="error">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div
+          class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+        >
           <span>
             Die Neuigkeiten konnten nicht geladen werden.
           </span>
@@ -58,95 +121,96 @@
       </BaseAlert>
     </BaseSection>
 
+    <!-- News-Übersicht -->
     <BaseSection
-      v-if="featuredNews"
-      class="bg-white"
+      v-else
+      class="bg-slate-50"
     >
-      <BaseCard
-        hover
-        :padded="false"
-        class="group"
+      <!-- Überschrift und Jahresfilter -->
+      <div
+        class="mb-10 flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between"
       >
-        <NuxtLink
-          :to="`/news/${featuredNews.slug}`"
-          class="grid h-full lg:grid-cols-2"
-        >
-          <div class="min-h-80 overflow-hidden bg-slate-200">
-            <img
-              :src="getStrapiMediaUrl(featuredNews.card)"
-              :alt="featuredNews.title"
-              class="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+        <div>
+          <p
+            class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-900"
+          >
+            Aus dem Vereinsleben
+          </p>
+
+          <h2
+            class="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl"
+          >
+            Neuigkeiten {{ selectedYear }}
+          </h2>
+
+          <p class="mt-4 text-slate-600">
+            {{ resultLabel }} aus dem gewählten Jahr
+          </p>
+        </div>
+
+        <div>
+          <p class="mb-3 text-sm font-bold text-slate-500">
+            Jahr auswählen
+          </p>
+
+          <div
+            class="flex max-w-full flex-wrap gap-2"
+            role="group"
+            aria-label="Neuigkeiten nach Jahr filtern"
+          >
+            <button
+              v-for="year in availableYears"
+              :key="year"
+              type="button"
+              class="rounded-full px-5 py-2.5 text-sm font-bold transition"
+              :class="
+                selectedYear === year
+                  ? 'bg-blue-900 text-white shadow-sm'
+                  : 'border border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-900'
+              "
+              :aria-pressed="selectedYear === year"
+              @click="selectedYear = year"
             >
+              {{ year }}
+            </button>
           </div>
-
-          <div class="flex flex-col justify-center p-7 sm:p-10">
-            <div class="flex flex-wrap items-center gap-3">
-              <BaseBadge>
-                {{ featuredNews.category }}
-              </BaseBadge>
-
-              <time
-                :datetime="featuredNews.date"
-                class="text-sm font-semibold text-slate-500"
-              >
-                {{
-                  new Intl.DateTimeFormat('de-DE', {
-                    day: '2-digit',
-                    month: 'long',
-                    year: 'numeric',
-                  }).format(new Date(featuredNews.date))
-                }}
-              </time>
-            </div>
-
-            <h2
-              class="mt-5 text-3xl font-black tracking-tight text-slate-950 transition group-hover:text-blue-700 sm:text-4xl"
-            >
-              {{ featuredNews.title }}
-            </h2>
-
-            <p class="mt-5 text-lg leading-8 text-slate-600">
-              {{ featuredNews.excerpt }}
-            </p>
-
-            <span
-              class="mt-7 inline-flex items-center gap-2 font-bold text-blue-700"
-            >
-              Artikel lesen
-
-              <span
-                class="transition-transform duration-300 group-hover:translate-x-1"
-                aria-hidden="true"
-              >
-                →
-              </span>
-            </span>
-          </div>
-        </NuxtLink>
-      </BaseCard>
-    </BaseSection>
-
-    <BaseSection class="bg-slate-50">
-      <div class="mb-10">
-        <p
-          class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-700"
-        >
-          Weitere Meldungen
-        </p>
-
-        <h2
-          class="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl"
-        >
-          Alle Neuigkeiten
-        </h2>
+        </div>
       </div>
 
-      <div class="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+      <!-- Karten -->
+      <div
+        v-if="filteredArticles.length"
+        class="grid gap-7 md:grid-cols-2 lg:grid-cols-3"
+      >
         <NewsCard
-          v-for="article in remainingNews"
+          v-for="article in filteredArticles"
           :key="article.documentId"
           :article="article"
         />
+      </div>
+
+      <!-- Keine News im ausgewählten Jahr -->
+      <div
+        v-else
+        class="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center"
+      >
+        <h2 class="text-2xl font-black text-slate-950">
+          Keine Neuigkeiten für {{ selectedYear }}
+        </h2>
+
+        <p class="mx-auto mt-3 max-w-xl leading-7 text-slate-600">
+          Für dieses Jahr sind derzeit keine Meldungen veröffentlicht.
+          Wähle ein anderes Jahr aus oder schau später noch einmal vorbei.
+        </p>
+
+        <button
+          v-if="selectedYear !== currentYear"
+          type="button"
+          class="mt-6 font-bold text-blue-900 transition hover:text-blue-500"
+          @click="selectedYear = currentYear"
+        >
+          Zum aktuellen Jahr {{ currentYear }}
+        </button>
       </div>
     </BaseSection>
   </main>

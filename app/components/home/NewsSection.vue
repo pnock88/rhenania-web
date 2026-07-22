@@ -1,23 +1,85 @@
 <script setup lang="ts">
-  const {
-    featuredArticle: featuredNews,
-    homepageArticles: newsItems,
-    pending,
-    error,
-    refresh,
-  } = useNewsData()
+const {
+  latestArticles: newsItems,
+  pending,
+  error,
+  refresh,
+} = useNewsData()
 
-  const { getStrapiMediaUrl } = useStrapiMedia()
+const slider = ref<HTMLElement | null>(null)
+
+const canScrollLeft = ref(false)
+const canScrollRight = ref(false)
+
+const updateScrollButtons = () => {
+  const element = slider.value
+
+  if (!element) {
+    canScrollLeft.value = false
+    canScrollRight.value = false
+    return
+  }
+
+  canScrollLeft.value = element.scrollLeft > 5
+
+  canScrollRight.value =
+    element.scrollLeft + element.clientWidth
+    < element.scrollWidth - 5
+}
+
+const scrollSlider = (direction: 'left' | 'right') => {
+  const element = slider.value
+
+  if (!element) {
+    return
+  }
+
+  const card = element.querySelector<HTMLElement>('[data-news-card]')
+  const gap = 20
+
+  const distance = card
+    ? card.offsetWidth + gap
+    : element.clientWidth
+
+  element.scrollBy({
+    left: direction === 'right' ? distance : -distance,
+    behavior: 'smooth',
+  })
+}
+
+const handleResize = () => {
+  updateScrollButtons()
+}
+
+onMounted(() => {
+  nextTick(updateScrollButtons)
+  window.addEventListener('resize', handleResize)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize)
+})
+
+watch(
+  newsItems,
+  () => {
+    nextTick(updateScrollButtons)
+  },
+  {
+    flush: 'post',
+  },
+)
 </script>
 
 <template>
-  <BaseSection class="bg-white">
+  <BaseSection class="overflow-hidden bg-white">
+    <!-- Überschrift -->
     <div
-      class="mb-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"
+      class="mb-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between"
     >
       <div>
         <p
-          class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-700"
+          class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-900"
         >
           Aus dem Vereinsleben
         </p>
@@ -27,18 +89,72 @@
         >
           Aktuelles
         </h2>
+
+        <p class="mt-4 max-w-2xl text-lg leading-8 text-slate-600">
+          Neuigkeiten, Veranstaltungen und Informationen aus unserem Verein.
+        </p>
       </div>
 
-      <NuxtLink
-        to="/news"
-        class="inline-flex items-center gap-2 font-bold text-blue-700 transition hover:text-blue-500"
-      >
-        Zur News-Übersicht
+      <div class="flex items-center gap-3">
+        <!-- Slider-Steuerung -->
+        <div
+          v-if="newsItems.length > 4"
+          class="flex items-center gap-2"
+        >
+          <button
+            type="button"
+            aria-label="Vorherige Meldung"
+            class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-30"
+            :disabled="!canScrollLeft"
+            @click="scrollSlider('left')"
+          >
+            <svg
+              class="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+          </button>
 
-        <span aria-hidden="true">
-          →
-        </span>
-      </NuxtLink>
+          <button
+            type="button"
+            aria-label="Nächste Meldung"
+            class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-30"
+            :disabled="!canScrollRight"
+            @click="scrollSlider('right')"
+          >
+            <svg
+              class="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m9 18 6-6-6-6" />
+            </svg>
+          </button>
+        </div>
+
+        <NuxtLink
+          to="/news"
+          class="inline-flex items-center gap-2 whitespace-nowrap font-bold text-blue-900 transition hover:text-blue-500"
+        >
+          Alle News
+
+          <span aria-hidden="true">
+            →
+          </span>
+        </NuxtLink>
+      </div>
     </div>
 
     <!-- Ladezustand -->
@@ -74,88 +190,39 @@
       </div>
     </BaseAlert>
 
-    <!-- News -->
+    <!-- Slider -->
     <div
-      v-else-if="featuredNews"
-      class="grid gap-6 lg:grid-cols-[1.15fr_1fr]"
+      v-else-if="newsItems.length"
+      class="relative"
     >
-      <!-- Hauptmeldung -->
-      <BaseCard
-        hover
-        :padded="false"
-        class="group h-full"
+      <div
+        ref="slider"
+        class="-mx-4 flex snap-x snap-mandatory gap-5 overflow-x-auto px-4 pb-6 scrollbar-hide sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8"
+        @scroll.passive="updateScrollButtons"
       >
-        <NuxtLink
-          :to="`/news/${featuredNews.slug}`"
-          class="flex h-full flex-col"
-        >
-          <div
-            class="relative aspect-[16/10] overflow-hidden bg-slate-200"
-          >
-            <img
-              :src="
-                getStrapiMediaUrl(
-                  featuredNews.card ?? featuredNews.image,
-                )
-              "
-              :alt="featuredNews.title"
-              loading="lazy"
-              class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-            >
-
-            <div class="absolute left-5 top-5">
-              <BaseBadge>
-                {{ featuredNews.category }}
-              </BaseBadge>
-            </div>
-          </div>
-
-          <div class="flex flex-1 flex-col p-6 sm:p-8">
-            <time
-              v-if="featuredNews.date"
-              :datetime="featuredNews.date"
-              class="text-sm font-medium text-slate-500"
-            >
-              {{ formatArticleDate(featuredNews.date) }}
-            </time>
-
-            <h3
-              class="mt-3 text-2xl font-black leading-tight text-slate-950 transition group-hover:text-blue-700 sm:text-3xl"
-            >
-              {{ featuredNews.title }}
-            </h3>
-
-            <p class="mt-4 flex-1 leading-7 text-slate-600">
-              {{ featuredNews.excerpt }}
-            </p>
-
-            <span
-              class="mt-6 inline-flex items-center gap-2 text-sm font-bold text-blue-700"
-            >
-              Weiterlesen
-
-              <span
-                class="transition-transform duration-300 group-hover:translate-x-1"
-                aria-hidden="true"
-              >
-                →
-              </span>
-            </span>
-          </div>
-        </NuxtLink>
-      </BaseCard>
-
-      <!-- Weitere Meldungen -->
-      <div class="grid gap-5 sm:grid-cols-2">
-        <NewsCard
+        <div
           v-for="article in newsItems"
           :key="article.documentId"
-          :article="article"
-        />
+          data-news-card
+          class="w-[85%] shrink-0 snap-start sm:w-[calc((100%-20px)/2)] lg:w-[calc((100%-40px)/3)] xl:w-[calc((100%-60px)/4)]"
+        >
+          <NewsCard
+            :article="article"
+            class="h-full"
+          />
+        </div>
       </div>
+
+      <!-- Mobile-Hinweis -->
+      <p
+        v-if="newsItems.length > 1"
+        class="mt-1 text-center text-sm text-slate-400 sm:hidden"
+      >
+        Zum Durchblättern seitlich wischen
+      </p>
     </div>
 
-    <!-- Keine News vorhanden -->
+    <!-- Keine News -->
     <div
       v-else
       class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center"
@@ -170,3 +237,14 @@
     </div>
   </BaseSection>
 </template>
+
+<style scoped>
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+</style>

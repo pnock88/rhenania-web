@@ -87,16 +87,40 @@ const fallbackLogo = '/images/logos/opponent.png'
       class="flex flex-col gap-3 border-b border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"
     >
       <div class="flex flex-wrap items-center gap-3">
-        <BaseBadge variant="secondary">
-          {{ teamLabel }}
-        </BaseBadge>
-
-        <span
+      
+        <div
           v-if="match.competition"
-          class="text-sm font-semibold text-slate-500"
+          class="w-full text-sm font-semibold text-slate-500"
         >
           {{ match.competition }}
-        </span>
+        </div>
+
+        <template v-if="match.location === 'Grünstrasse 17, 40699 Erkrath'">
+          <BaseBadge variant="secondary">
+            {{ teamLabel }}
+          </BaseBadge>
+          <BaseBadge variant="secondary">
+            vs.
+          </BaseBadge>
+          <BaseBadge variant="secondary">
+            {{ match.awayTeamName }}
+          </BaseBadge>
+        </template>
+        <template v-else>
+          <BaseBadge variant="secondary">
+            {{ match.homeTeamName }}
+          </BaseBadge>
+          <BaseBadge variant="secondary">
+            vs.
+          </BaseBadge>
+          <BaseBadge variant="secondary">
+            {{ teamLabel }}
+          </BaseBadge>
+        </template>
+  
+       <!-- <BaseBadge variant="secondary">
+          {{ teamLabel }}
+        </BaseBadge> -->
 
         <span
           v-if="match.matchday"
@@ -220,7 +244,7 @@ const fallbackLogo = '/images/logos/opponent.png'
         </div>
 
         <!-- Mannschaftsnamen -->
-        <div
+        <!--<div
           class="grid grid-cols-[minmax(0,1fr)_112px_minmax(0,1fr)] gap-4 text-center"
         >
           <div class="flex h-24 items-center justify-center px-2 text-center">
@@ -237,7 +261,7 @@ const fallbackLogo = '/images/logos/opponent.png'
             </p>
           </div>
 
-        </div>
+        </div>-->
       </div>
 
       <!-- Spielort -->

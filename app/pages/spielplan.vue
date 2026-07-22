@@ -8,7 +8,7 @@ useSeoMeta({
 })
 
 type StatusFilter = 'upcoming' | 'finished'
-type TeamFilter = 'all' | string
+type TeamFilter = 'all' | 'youth' | string
 type VenueFilter = 'all' | 'home' | 'away'
 
 const statusFilter = ref<StatusFilter>('upcoming')
@@ -26,19 +26,54 @@ const matches = computed<StrapiMatch[]>(() => {
   return matchResponse.value?.data ?? []
 })
 
+const youthCategories = [
+  'Junioren',
+  'Juniorinnen',
+  'Soccer Girls',
+]
+
+const isYouthTeam = (match: StrapiMatch) => {
+  return (
+    match.team?.section === 'Nachwuchs'
+    || youthCategories.includes(match.team?.category ?? '')
+  )
+}
+
 const teams = computed(() => {
   const uniqueTeams = new Map<string, string>()
+  let hasYouthTeams = false
 
   matches.value.forEach((match) => {
-    if (match.team?.documentId && match.team.name) {
-      uniqueTeams.set(match.team.documentId, match.team.name)
+    const team = match.team
+
+    if (!team?.documentId || !team.name) {
+      return
     }
+
+    if (isYouthTeam(match)) {
+      hasYouthTeams = true
+      return
+    }
+
+    uniqueTeams.set(team.documentId, team.name)
   })
 
-  return Array.from(uniqueTeams, ([documentId, name]) => ({
-    documentId,
-    name,
-  }))
+  const filters = Array.from(
+    uniqueTeams,
+    ([documentId, name]) => ({
+      value: documentId,
+      label: name,
+    }),
+  )
+
+  if (hasYouthTeams) {
+    filters.push({
+      value: 'youth',
+      label: 'Jugend',
+    })
+  }
+
+  return filters
 })
 
 const filteredMatches = computed(() => {
@@ -46,7 +81,11 @@ const filteredMatches = computed(() => {
     .filter((match) => {
       const matchesTeam =
         teamFilter.value === 'all'
-        || match.team?.documentId === teamFilter.value
+        || (
+          teamFilter.value === 'youth'
+            ? isYouthTeam(match)
+            : match.team?.documentId === teamFilter.value
+        )
 
       const matchesStatus =
         statusFilter.value === 'upcoming'
@@ -107,17 +146,17 @@ const filteredMatches = computed(() => {
 
               <button
                 v-for="team in teams"
-                :key="team.documentId"
+                :key="team.value"
                 type="button"
                 class="rounded-full px-4 py-2 text-sm font-bold transition"
                 :class="
-                  teamFilter === team.documentId
+                  teamFilter === team.value
                     ? 'bg-blue-700 text-white'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 "
-                @click="teamFilter = team.documentId"
+                @click="teamFilter = team.value"
               >
-                {{ team.name }}
+                {{ team.label }}
               </button>
             </div>
           </div>

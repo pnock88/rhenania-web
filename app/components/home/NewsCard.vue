@@ -43,17 +43,17 @@
         </time>
 
         <h3
-          class="mt-3 text-xl font-black leading-tight text-slate-950 transition group-hover:text-blue-700"
+          class="mt-3 text-lg font-black leading-tight text-slate-950 transition group-hover:text-blue-900"
         >
           {{ article.title }}
         </h3>
 
-        <p class="mt-3 flex-1 leading-7 text-slate-600">
+        <p class="mt-3 flex-1 leading-5 text-slate-600 text-sm">
           {{ article.excerpt }}
         </p>
 
         <span
-          class="mt-6 inline-flex items-center gap-2 text-sm font-bold text-blue-700"
+          class="mt-6 inline-flex items-center gap-2 text-sm font-bold text-blue-900"
         >
           Weiterlesen
 

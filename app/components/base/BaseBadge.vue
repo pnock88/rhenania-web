@@ -33,7 +33,7 @@ const classes = computed(() => {
       return 'bg-slate-200 text-slate-700'
 
     default:
-      return 'bg-blue-700 text-white'
+      return 'bg-blue-900 text-white'
   }
 })
 </script>
