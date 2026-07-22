@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { StrapiCoach } from '~/types/strapi'
+import type { StrapiPerson } from '~/types/strapi'
 
 const props = defineProps<{
-  coach: StrapiCoach
+  coach: StrapiPerson
 }>()
 
 const { getStrapiMediaUrl } = useStrapiMedia()
@@ -23,21 +24,15 @@ const phoneHref = computed(() => {
   >
     <div class="aspect-[4/3] bg-slate-200">
       <img
-        :src="
-          getStrapiMediaUrl(
-            coach.image,
-            '/images/teams/coaches/placeholder.jpg',
-          )
-        "
+        v-if="coach.image"
+        :src="getStrapiMediaUrl(coach.image)"
         :alt="coach.name"
-        loading="lazy"
-        class="h-full w-full object-cover"
       >
     </div>
-
+    
     <div class="p-6">
       <BaseBadge variant="secondary">
-        {{ coach.role }}
+        {{ coach.function  }}
       </BaseBadge>
 
       <h3 class="mt-4 text-2xl font-black text-slate-950">

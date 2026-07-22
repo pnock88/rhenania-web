@@ -382,9 +382,9 @@ useSeoMeta({
 
         <div class="grid gap-6 sm:grid-cols-3 lg:grid-cols-4">
             <TeamCoachCard
-                v-for="coach in activeCoaches"
-                :key="coach.id"
-                :coach="coach"
+              v-for="coach in activeCoaches"
+              :key="coach.documentId"
+              :coach="coach"
             />
         </div>
       </BaseSection>

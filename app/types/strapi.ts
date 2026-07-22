@@ -77,15 +77,13 @@ export type StrapiTeam = {
   documentId: string
   name: string
   slug: string
-  category: TeamCategory
-  section: TeamSection
   description: string
   league: string | null
   order: number
   active: boolean
   image: StrapiMedia | null
   trainingSessions: StrapiTrainingSession[]
-  coaches: StrapiCoach[]
+  coaches: StrapiPerson[]
   publishedAt: string
   createdAt: string
   updatedAt: string
@@ -181,3 +179,115 @@ export type MatchVenueType =
   | 'home'
   | 'away'
   | 'neutral'
+
+export type StrapiPerson = {
+  id: number
+  documentId: string
+  name: string
+  slug: string
+  function: string | null
+  email: string | null
+  phone: string | null
+  mobile: string | null
+  description: string | null
+  order: number | null
+  active: boolean
+  board: boolean | null
+  youth: boolean | null
+  coach: boolean | null
+  contact: boolean | null
+  instagram: string | null
+  facebook: string | null
+  linkedin: string | null
+  image?: StrapiMedia | null
+  createdAt: string
+  updatedAt: string
+  publishedAt: string
+}
+
+export type StrapiClub = {
+  id: number
+  documentId: string
+  name: string
+  founded: number | null
+  slogan: string | null
+  description: StrapiContentBlock[] | null
+  history: StrapiContentBlock[] | null
+  historyEntries: StrapiHistoryEntry[]
+  street: string | null
+  zip: string | null
+  city: string | null
+  email: string | null
+  phone: string | null
+  website: string | null
+  facebook: string | null
+  instagram: string | null
+  youtube: string | null
+  clubhouseName: string | null
+  clubhouseDescription: string | null
+  heroImage: StrapiMedia | null
+  historyImage: StrapiMedia | null
+  chairman: StrapiPerson | null
+  viceChairman: StrapiPerson | null
+  youthManager: StrapiPerson | null
+  viceYouthManager: StrapiPerson | null
+  membershipContact: StrapiPerson | null
+  sponsorContact: StrapiPerson | null
+  managingDirector: StrapiPerson | null
+  cashier: StrapiPerson | null
+  viceCashier: StrapiPerson | null
+  createdAt: string
+  updatedAt: string
+  publishedAt: string
+}
+
+export type StrapiSingleResponse<T> = {
+  data: T | null
+  meta: Record<string, unknown>
+}
+
+export type StrapiTextNode = {
+  type: 'text'
+  text: string
+  bold?: boolean
+  italic?: boolean
+  underline?: boolean
+  strikethrough?: boolean
+  code?: boolean
+}
+
+export type StrapiLinkNode = {
+  type: 'link'
+  url: string
+  children: StrapiTextNode[]
+}
+
+export type StrapiBlockNode =
+  | StrapiTextNode
+  | StrapiLinkNode
+  | StrapiContentBlock
+
+export type StrapiContentBlock = {
+  type:
+    | 'paragraph'
+    | 'heading'
+    | 'list'
+    | 'list-item'
+    | 'quote'
+    | 'code'
+  level?: number
+  format?: 'ordered' | 'unordered'
+  children: StrapiBlockNode[]
+}
+
+export type StrapiHistoryEntry = {
+  id: number
+  year: number | null
+  yearLabel: string | null
+  title: string
+  content: StrapiContentBlock[] | null
+  image: StrapiMedia | null
+  imageAlt: string | null
+  order: number | null
+  featured: boolean
+}

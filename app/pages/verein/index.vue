@@ -1,251 +1,425 @@
 <script setup lang="ts">
-useSeoMeta({
-  title: 'Unser Verein | SC Rhenania Hochdahl',
-  description:
-    'Geschichte, Werte, Ehrenamt und Vereinsleben des SC Rhenania Hochdahl 1925 e.V.',
+import type {
+  StrapiHistoryEntry,
+  StrapiPerson,
+} from '~/types/strapi'
+
+const {
+  data: clubResponse,
+  pending,
+  error,
+  refresh,
+} = useStrapiClub()
+
+const { getStrapiMediaUrl } = useStrapiMedia()
+
+const club = computed(() => {
+  return clubResponse.value?.data ?? null
 })
 
-const values = [
-  {
-    title: 'Gemeinschaft',
-    description:
-      'Unser Verein verbindet Menschen verschiedener Generationen und Hintergründe.',
-    icon: 'heart',
-  },
-  {
-    title: 'Leidenschaft',
-    description:
-      'Wir leben Fußball mit Einsatz, Freude und Begeisterung – auf und neben dem Platz.',
-    icon: 'ball',
-  },
-  {
-    title: 'Fairplay',
-    description:
-      'Respekt, Verlässlichkeit und ein faires Miteinander bestimmen unser Handeln.',
-    icon: 'shield',
-  },
-  {
-    title: 'Ehrenamt',
-    description:
-      'Engagierte Mitglieder machen Training, Spielbetrieb und Vereinsleben möglich.',
-    icon: 'users',
-  },
-]
+const historyEntries = computed<StrapiHistoryEntry[]>(() => {
+  return club.value?.historyEntries ?? []
+})
 
-const boardMembers = [
-  {
-    name: 'Max Mustermann',
-    role: '1. Vorsitzender',
-    email: 'vorsitz@rhenania-hochdahl.de',
-    image: '/images/club/board-1.jpg',
-  },
-  {
-    name: 'Erika Musterfrau',
-    role: '2. Vorsitzende',
-    email: 'vorstand@rhenania-hochdahl.de',
-    image: '/images/club/board-2.jpg',
-  },
-  {
-    name: 'Peter Beispiel',
-    role: 'Geschäftsführer',
-    email: 'geschaeftsstelle@rhenania-hochdahl.de',
-    image: '/images/club/board-3.jpg',
-  },
-]
+const boardMembers = computed<StrapiPerson[]>(() => {
+  if (!club.value) {
+    return []
+  }
+
+  return [
+    club.value.chairman,
+    club.value.viceChairman,
+    club.value.managingDirector,
+    club.value.cashier,
+    club.value.viceCashier,
+  ]
+    .filter((person): person is StrapiPerson => Boolean(person))
+    .filter(person => person.active !== false)
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+})
+
+const youthLeadership = computed<StrapiPerson[]>(() => {
+  if (!club.value) {
+    return []
+  }
+
+  return [
+    club.value.youthManager,
+    club.value.viceYouthManager,
+  ]
+    .filter((person): person is StrapiPerson => Boolean(person))
+    .filter(person => person.active !== false)
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+})
+
+const address = computed(() => {
+  return [
+    club.value?.street,
+    [club.value?.zip, club.value?.city]
+      .filter(Boolean)
+      .join(' '),
+  ].filter(Boolean)
+})
+
+useSeoMeta({
+  title: () =>
+    club.value?.name
+      ? `Verein | ${club.value.name}`
+      : 'Verein | SC Rhenania Hochdahl',
+
+  description: () =>
+    club.value?.slogan
+    ?? 'Informationen über den SC Rhenania Hochdahl.',
+})
 </script>
 
 <template>
   <main>
-    <!-- Seiten-Hero -->
-    <BasePageHero
-      eyebrow="Unser Verein"
-      title="Mehr als Fußball"
-      highlight="seit 1925."
-      description="Der SC Rhenania Hochdahl steht für sportliche Leidenschaft, nachhaltige Nachwuchsarbeit und eine starke Gemeinschaft."
-      image="/images/home/hero-team.jpg"
-    />
+    <BaseSection
+      v-if="pending"
+      class="min-h-screen bg-slate-50 pt-32"
+    >
+      <div class="py-20 text-center">
+        <p class="font-bold text-slate-600">
+          Vereinsinformationen werden geladen …
+        </p>
+      </div>
+    </BaseSection>
 
-    <!-- Geschichte -->
-    <BaseSection class="bg-white">
-      <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
-        <div>
-          <p
-            class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-700"
+    <BaseSection
+      v-else-if="error"
+      class="min-h-screen bg-slate-50 pt-32"
+    >
+      <BaseAlert variant="error">
+        <div
+          class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <span>
+            Die Vereinsinformationen konnten nicht geladen werden.
+          </span>
+
+          <button
+            type="button"
+            class="font-bold underline"
+            @click="refresh"
           >
-            Unsere Geschichte
-          </p>
+            Erneut versuchen
+          </button>
+        </div>
+      </BaseAlert>
+    </BaseSection>
 
-          <h2
-            class="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl"
-          >
-            Verwurzelt in Hochdahl
-          </h2>
+    <template v-else-if="club">
+      <BasePageHero
+        eyebrow="Unser Verein"
+        :title="club.name"
+        :highlight="
+          club.founded && club.founded > 0
+            ? `seit ${club.founded}.`
+            : undefined
+        "
+        :description="
+          club.slogan
+          ?? club.description
+          ?? 'Tradition, Gemeinschaft und Fußball in Hochdahl.'
+        "
+        :image="
+          getStrapiMediaUrl(
+            club.heroImage,
+            '/images/home/hero-team.jpg',
+          )
+        "
+      />
 
-          <div class="mt-7 space-y-5 text-lg leading-8 text-slate-600">
-            <p>
-              Seit seiner Gründung im Jahr 1925 ist der SC Rhenania Hochdahl
-              ein fester Bestandteil des sportlichen und gesellschaftlichen
-              Lebens in Hochdahl.
+      <BaseSection class="bg-white">
+        <div class="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+          <div>
+            <p
+              class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-700"
+            >
+              Über uns
             </p>
 
-            <p>
-              Was als Fußballverein begann, entwickelte sich über viele
-              Jahrzehnte zu einer Gemeinschaft, in der Kinder, Jugendliche
-              und Erwachsene gemeinsam Sport erleben.
-            </p>
+            <h2
+              class="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl"
+            >
+              Mehr als Fußball
+            </h2>
 
-            <p>
-              Dabei stehen nicht nur Ergebnisse und Tabellenplätze im
-              Mittelpunkt. Mindestens genauso wichtig sind Teamgeist,
-              persönliche Entwicklung und gegenseitiger Respekt.
+            <StrapiBlocks
+              v-if="club.description?.length"
+              :blocks="club.description"
+              class="mt-6"
+            />
+
+            <p
+              v-else
+              class="mt-6 text-lg leading-8 text-slate-600"
+            >
+              Der SC Rhenania Hochdahl steht für sportliche Leidenschaft,
+              Nachwuchsarbeit und ein starkes Vereinsleben.
             </p>
           </div>
-        </div>
-
-        <div
-          class="relative min-h-[440px] overflow-hidden rounded-3xl bg-slate-200 shadow-2xl"
-        >
-          <img
-            src="/images/home/hero-team.jpg"
-            alt="Spieler des SC Rhenania Hochdahl"
-            class="absolute inset-0 h-full w-full object-cover"
-          >
 
           <div
-            class="absolute bottom-6 left-6 right-6 rounded-2xl bg-slate-950/85 p-6 text-white backdrop-blur"
+            v-if="club.historyImage"
+            class="flex justify-center"
           >
-            <p class="text-4xl font-black text-blue-400">
-              1925
-            </p>
-
-            <p class="mt-1 font-bold">
-              Gründung des SC Rhenania Hochdahl
-            </p>
+            <img
+              :src="getStrapiMediaUrl(club.historyImage)"
+              :alt="club.name"
+              class="h-auto max-w-full rounded-3xl object-contain shadow-xl"
+            >
           </div>
         </div>
-      </div>
-    </BaseSection>
+      </BaseSection>
 
-    <!-- Werte -->
-    <BaseSection class="bg-slate-50">
-      <div class="mx-auto max-w-3xl text-center">
-        <p
-          class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-700"
-        >
-          Wofür wir stehen
-        </p>
-
-        <h2
-          class="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl"
-        >
-          Unsere Werte
-        </h2>
-
-        <p class="mt-5 text-lg leading-8 text-slate-600">
-          Diese Grundsätze prägen unseren Umgang miteinander und unsere
-          tägliche Vereinsarbeit.
-        </p>
-      </div>
-
-      <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <ContactPersonCard
-          v-for="contact in contacts"
-          :key="contact.email"
-          v-bind="contact"
-        />
-      </div>
-    </BaseSection>
-
-    <!-- Vorstand -->
-    <BaseSection class="bg-white">
-      <div
-        class="mb-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"
+      <BaseSection
+        v-if="historyEntries"
+        class="bg-slate-50"
       >
-        <div>
+        <div class="mb-12 max-w-3xl">
           <p
             class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-700"
           >
-            Ansprechpartner
+            Seit den Anfängen
           </p>
 
           <h2
             class="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl"
           >
-            Unser Vorstand
+            Unsere Vereinsgeschichte
           </h2>
+
+          <p class="mt-5 text-lg leading-8 text-slate-600">
+            Wichtige Ereignisse, sportliche Erfolge und besondere Geschichten aus
+            der Entwicklung des SC Rhenania Hochdahl.
+          </p>
         </div>
 
-        <NuxtLink
-          to="/kontakt"
-          class="font-bold text-blue-700 transition hover:text-blue-500"
-        >
-          Alle Ansprechpartner →
-        </NuxtLink>
-      </div>
+        <ClubHistoryTimeline :entries="historyEntries" />
+      </BaseSection>
 
-      <div class="grid gap-6 md:grid-cols-3">
-        <ContactPersonCard
-          v-for="member in boardMembers"
-          :key="member.email"
-          v-bind="member"
-        />
-      </div>
-    </BaseSection>
-
-    <!-- Gelände -->
-    <BaseSection class="bg-slate-950 text-white">
-      <div class="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-center">
-        <div>
+      <BaseSection
+        v-if="boardMembers.length"
+        class="bg-white"
+      >
+        <div class="mb-10">
           <p
-            class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-400"
+            class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-700"
           >
-            Unser Zuhause
+            Verantwortung
           </p>
 
-          <h2 class="mt-4 text-4xl font-black sm:text-5xl">
-            Sportanlage Sandheide
+          <h2
+            class="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl"
+          >
+            Vorstand
           </h2>
+        </div>
 
-          <p class="mt-6 text-lg leading-8 text-slate-300">
-            Hier finden Training, Heimspiele und ein großer Teil unseres
-            Vereinslebens statt.
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <TeamCoachCard
+            v-for="person in boardMembers"
+            :key="person.documentId"
+            :coach="person"
+          />
+        </div>
+      </BaseSection>
+
+      <BaseSection
+        v-if="youthLeadership.length"
+        class="bg-slate-50"
+      >
+        <div class="mb-10">
+          <p
+            class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-700"
+          >
+            Nachwuchs
           </p>
 
-          <address class="mt-7 not-italic text-slate-300">
-            <p class="font-bold text-white">
-              SC Rhenania Hochdahl 1925 e.V.
-            </p>
+          <h2
+            class="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl"
+          >
+            Jugendleitung
+          </h2>
+        </div>
 
-            <p class="mt-2">
-              Sandheide<br>
-              40699 Erkrath
-            </p>
-          </address>
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <TeamCoachCard
+            v-for="person in youthLeadership"
+            :key="person.documentId"
+            :coach="person"
+          />
+        </div>
+      </BaseSection>
 
-          <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-            <BaseButton to="/kontakt">
-              Kontakt
-            </BaseButton>
-
-            <BaseButton
-              to="https://maps.google.com"
-              external
-              variant="outline"
+      <BaseSection class="bg-white">
+        <div class="grid gap-8 lg:grid-cols-2">
+          <BaseCard>
+            <p
+              class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-700"
             >
-              Route planen
-            </BaseButton>
-          </div>
-        </div>
+              Kontakt
+            </p>
 
-        <div
-          class="flex min-h-[420px] items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-slate-900"
-        >
-          <p class="px-8 text-center text-slate-400">
-            Hier kann später eine Karte oder ein Luftbild des Vereinsgeländes
-            eingebunden werden.
-          </p>
+            <h2 class="mt-4 text-3xl font-black text-slate-950">
+              Vereinsdaten
+            </h2>
+
+            <dl class="mt-7 space-y-5">
+              <div v-if="address.length">
+                <dt class="text-sm font-semibold text-slate-500">
+                  Anschrift
+                </dt>
+
+                <dd class="mt-1 font-bold text-slate-950">
+                  <span
+                    v-for="line in address"
+                    :key="line"
+                    class="block"
+                  >
+                    {{ line }}
+                  </span>
+                </dd>
+              </div>
+
+              <div v-if="club.phone">
+                <dt class="text-sm font-semibold text-slate-500">
+                  Telefon
+                </dt>
+
+                <dd class="mt-1">
+                  <a
+                    :href="`tel:${club.phone}`"
+                    class="font-bold text-blue-700 hover:underline"
+                  >
+                    {{ club.phone }}
+                  </a>
+                </dd>
+              </div>
+
+              <div v-if="club.email">
+                <dt class="text-sm font-semibold text-slate-500">
+                  E-Mail
+                </dt>
+
+                <dd class="mt-1">
+                  <a
+                    :href="`mailto:${club.email}`"
+                    class="font-bold text-blue-700 hover:underline"
+                  >
+                    {{ club.email }}
+                  </a>
+                </dd>
+              </div>
+
+              <div v-if="club.website">
+                <dt class="text-sm font-semibold text-slate-500">
+                  Website
+                </dt>
+
+                <dd class="mt-1">
+                  <a
+                    :href="club.website"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="font-bold text-blue-700 hover:underline"
+                  >
+                    {{ club.website }}
+                  </a>
+                </dd>
+              </div>
+            </dl>
+          </BaseCard>
+
+          <BaseCard>
+            <p
+              class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-700"
+            >
+              Social Media
+            </p>
+
+            <h2 class="mt-4 text-3xl font-black text-slate-950">
+              Folge uns
+            </h2>
+
+            <div class="mt-7 flex flex-col gap-3">
+              <a
+                v-if="club.facebook"
+                :href="club.facebook"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="rounded-xl bg-slate-100 px-5 py-4 font-bold text-slate-950 transition hover:bg-blue-50 hover:text-blue-700"
+              >
+                Facebook
+              </a>
+
+              <a
+                v-if="club.instagram"
+                :href="club.instagram"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="rounded-xl bg-slate-100 px-5 py-4 font-bold text-slate-950 transition hover:bg-blue-50 hover:text-blue-700"
+              >
+                Instagram
+              </a>
+
+              <a
+                v-if="club.youtube"
+                :href="club.youtube"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="rounded-xl bg-slate-100 px-5 py-4 font-bold text-slate-950 transition hover:bg-blue-50 hover:text-blue-700"
+              >
+                YouTube
+              </a>
+            </div>
+          </BaseCard>
         </div>
-      </div>
-    </BaseSection>
+      </BaseSection>
+    </template>
   </main>
 </template>
+
+<style scoped>
+.article-content {
+  color: #475569;
+  font-size: 1.125rem;
+  line-height: 2;
+}
+
+.article-content :deep(p) {
+  margin-top: 1.25rem;
+}
+
+.article-content :deep(p:first-child) {
+  margin-top: 0;
+}
+
+.article-content :deep(strong) {
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.article-content :deep(h2),
+.article-content :deep(h3) {
+  margin-top: 2rem;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.article-content :deep(ul),
+.article-content :deep(ol) {
+  margin-top: 1rem;
+  padding-left: 1.75rem;
+}
+
+.article-content :deep(ul) {
+  list-style-type: disc;
+}
+
+.article-content :deep(ol) {
+  list-style-type: decimal;
+}
+</style>

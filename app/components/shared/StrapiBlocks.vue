@@ -1,44 +1,51 @@
 <script setup lang="ts">
 import type {
-  StrapiBlock,
+  StrapiBlockNode,
+  StrapiContentBlock,
   StrapiLinkNode,
   StrapiTextNode,
 } from '~/types/strapi'
 
 defineProps<{
-  blocks: StrapiBlock[]
+  blocks: StrapiContentBlock[]
 }>()
 
 const isTextNode = (
-  node: StrapiTextNode | StrapiLinkNode | StrapiBlock,
+  node: StrapiBlockNode,
 ): node is StrapiTextNode => {
   return node.type === 'text'
 }
 
 const isLinkNode = (
-  node: StrapiTextNode | StrapiLinkNode | StrapiBlock,
+  node: StrapiBlockNode,
 ): node is StrapiLinkNode => {
   return node.type === 'link'
 }
 
 const textClasses = (node: StrapiTextNode) => ({
-  'font-bold': node.bold,
+  'font-black text-slate-950': node.bold,
   italic: node.italic,
   underline: node.underline,
   'line-through': node.strikethrough,
   'rounded bg-slate-100 px-1.5 py-0.5 font-mono text-sm': node.code,
 })
+
+const headingTag = (level?: number) => {
+  const safeLevel = Math.min(Math.max(level ?? 2, 2), 4)
+
+  return `h${safeLevel}`
+}
 </script>
 
 <template>
-  <div class="space-y-6 text-lg leading-9 text-slate-700">
+  <div class="space-y-6 text-lg leading-8 text-slate-600">
     <template
       v-for="(block, blockIndex) in blocks"
       :key="blockIndex"
     >
       <p
         v-if="block.type === 'paragraph'"
-        class="leading-9"
+        class="leading-8"
       >
         <template
           v-for="(child, childIndex) in block.children"
@@ -54,6 +61,8 @@ const textClasses = (node: StrapiTextNode) => ({
           <a
             v-else-if="isLinkNode(child)"
             :href="child.url"
+            target="_blank"
+            rel="noopener noreferrer"
             class="font-bold text-blue-700 underline transition hover:text-blue-500"
           >
             <template
@@ -69,7 +78,7 @@ const textClasses = (node: StrapiTextNode) => ({
       </p>
 
       <component
-        :is="`h${block.level ?? 2}`"
+        :is="headingTag(block.level)"
         v-else-if="block.type === 'heading'"
         class="font-black tracking-tight text-slate-950"
         :class="{
@@ -115,13 +124,28 @@ const textClasses = (node: StrapiTextNode) => ({
             >
               {{ child.text }}
             </span>
+
+            <a
+              v-else-if="isLinkNode(child)"
+              :href="child.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-bold text-blue-700 underline"
+            >
+              <template
+                v-for="(linkChild, linkIndex) in child.children"
+                :key="linkIndex"
+              >
+                {{ linkChild.text }}
+              </template>
+            </a>
           </template>
         </li>
       </component>
 
       <blockquote
         v-else-if="block.type === 'quote'"
-        class="border-l-4 border-blue-600 bg-blue-50 px-6 py-5 italic text-slate-700"
+        class="rounded-r-2xl border-l-4 border-blue-600 bg-blue-50 px-6 py-5 italic text-slate-700"
       >
         <template
           v-for="(child, childIndex) in block.children"
