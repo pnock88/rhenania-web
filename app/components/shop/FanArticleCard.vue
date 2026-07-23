@@ -7,6 +7,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   select: [article: FanArticle]
+  preview: [image: string]
 }>()
 
 const formattedPrice = computed(() => {
@@ -59,6 +60,26 @@ const showNextImage = () => {
       ? 0
       : activeImageIndex.value + 1
 }
+
+const badgeClasses = (badge: string) => {
+  switch (badge.toLowerCase()) {
+    case 'neu':
+      return 'bg-emerald-600 text-white'
+
+    case 'sonderpreis':
+    case 'sale':
+      return 'bg-red-600 text-white'
+
+    case 'jubiläum':
+      return 'bg-blue-700 text-white'
+
+    case 'limitiert':
+      return 'bg-amber-400 text-slate-950'
+
+    default:
+      return 'bg-slate-800 text-white'
+  }
+}
 </script>
 
 <template>
@@ -80,7 +101,8 @@ const showNextImage = () => {
             :src="activeImage.src"
             :alt="activeImage.alt || article.name"
             loading="lazy"
-            class="h-full w-full object-contain transition duration-300 group-hover:scale-[1.03]"
+            class="h-full w-full cursor-pointer object-contain transition duration-300 group-hover:scale-[1.03]"
+            @click="emit('preview', activeImage.src)"
           >
         </Transition>
 
@@ -152,12 +174,19 @@ const showNextImage = () => {
         </template>
       </div>
 
-     <span
-        v-if="article.badge"
-        class="absolute left-3 top-3 rounded-md bg-blue-900 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-white"
+     <div
+        v-if="article.badges?.length"
+        class="absolute left-3 top-3 flex max-w-[calc(100%-1.5rem)] flex-wrap gap-1.5"
       >
-        {{ article.badge }}
-      </span>
+        <span
+          v-for="badge in article.badges"
+          :key="badge"
+          class="rounded-md px-2.5 py-1 text-[10px] font-black uppercase tracking-wide shadow-sm"
+          :class="badgeClasses(badge)"
+        >
+          {{ badge }}
+        </span>
+      </div>
     </div>
 
     <div class="flex flex-1 flex-col border-t border-slate-100 p-4">
@@ -202,7 +231,7 @@ const showNextImage = () => {
 
         <button
           type="button"
-          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-white transition hover:bg-blue-800"
+          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-900 text-white transition hover:bg-blue-800"
           :aria-label="`${article.name} auswählen`"
           @click="emit('select', article)"
         >

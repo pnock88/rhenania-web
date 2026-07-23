@@ -62,6 +62,14 @@ const createMailLink = (article: FanArticle) => {
 
   return `mailto:${orderEmail}?subject=${subject}&body=${body}`
 }
+
+const previewImage = ref('')
+const previewOpen = ref(false)
+
+const openPreview = (image: string) => {
+  previewImage.value = image
+  previewOpen.value = true
+}
 </script>
 
 <template>
@@ -107,14 +115,13 @@ const createMailLink = (article: FanArticle) => {
           </h2>
 
           <p class="mt-5 max-w-3xl text-lg leading-8 text-slate-600">
-            Sende uns deine Bestellung per E-Mail. Abholung und Bezahlung
-            erfolgen anschließend nach Absprache am Vereinsheim an der
-            Grünstraße.
+            Lege deine gewünschten Fanartikel einfach in den Warenkorb und sende deine Bestellung bequem über das integrierte Bestellformular ab. 
+            Wir melden uns anschließend zeitnah bei dir, um Abholung und Bezahlung am Vereinsheim an der Grünstraße mit dir abzustimmen.
           </p>
 
           <p class="mt-4 max-w-3xl leading-7 text-slate-600">
-            Viele Artikel können auch in weiteren Größen und Farben bestellt
-            werden. Schreibe deinen Wunsch einfach in die Bestellanfrage.
+            Viele Fanartikel sind auch in weiteren Größen oder Farben erhältlich. Sollte deine Wunschvariante nicht auswählbar sein, 
+            kannst du sie uns einfach im Bemerkungsfeld der Bestellung mitteilen.
           </p>
         </div>
 
@@ -122,15 +129,16 @@ const createMailLink = (article: FanArticle) => {
           class="flex flex-col justify-center border-t border-slate-200 bg-white p-7 lg:min-w-80 lg:border-l lg:border-t-0"
         >
           <p class="text-sm font-bold text-slate-500">
-            Bestellung per E-Mail
+            Ihr habt fragen?<br/><br/>
+            Dann kontaktiert uns per Mail
           </p>
 
-          <a
+          <!--<a
             :href="`mailto:${orderEmail}`"
             class="mt-2 break-all text-lg font-black text-blue-900 transition hover:text-blue-500"
           >
             {{ orderEmail }}
-          </a>
+          </a>-->
 
           <a
             :href="`mailto:${orderEmail}?subject=${encodeURIComponent('Fanartikel-Anfrage')}`"
@@ -180,6 +188,7 @@ const createMailLink = (article: FanArticle) => {
           :key="article.id"
           :article="article"
           @select="openProductModal"
+          @preview="openPreview"
         />
       </div>
     </BaseSection>
@@ -221,6 +230,12 @@ const createMailLink = (article: FanArticle) => {
       :article="selectedArticle"
       :open="isProductModalOpen"
       @close="closeProductModal"
+    />
+
+    <BaseImageLightbox
+      :open="previewOpen"
+      :src="previewImage"
+      @close="previewOpen = false"
     />
 
     <CartButton />

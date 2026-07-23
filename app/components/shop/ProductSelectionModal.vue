@@ -322,7 +322,7 @@ const modalImage = computed(() => {
 
             <button
               type="button"
-              class="mt-8 flex min-h-13 w-full items-center justify-center rounded-xl bg-blue-700 px-6 font-black text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+              class="mt-8 flex min-h-13 w-full items-center justify-center rounded-xl bg-blue-900 px-6 font-black text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
               :disabled="!hasRequiredSelection"
               @click="addSelectedItem"
             >

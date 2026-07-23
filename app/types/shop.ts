@@ -21,7 +21,7 @@ export type FanArticle = {
   colors?: FanArticleColor[]
   material?: string
   sizes?: string[]
-  badge?: string
+  badges?: string[]
 }
 
 export type CartItem = {

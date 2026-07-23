@@ -128,7 +128,7 @@ const subjectOptions = [
             </p>
 
             <h2 class="mt-4 text-3xl font-black">
-              Sportanlage Sandheide
+              Sportplatz Grünstrasse
             </h2>
 
             <address class="mt-6 not-italic leading-8 text-slate-300">
@@ -137,24 +137,24 @@ const subjectOptions = [
               </p>
 
               <p class="mt-2">
-                Sandheide<br>
+                Grünstrasse 17<br>
                 40699 Erkrath
               </p>
             </address>
 
             <div class="mt-7 space-y-3">
-              <a
+              Mail: <a
                 href="mailto:info@rhenania-hochdahl.de"
                 class="block font-bold text-blue-300 transition hover:text-white"
               >
                 info@rhenania-hochdahl.de
               </a>
 
-              <a
-                href="tel:+492104000000"
+              Tel: <a
+                href="tel:+49210446823"
                 class="block font-bold text-blue-300 transition hover:text-white"
               >
-                02104 000000
+                02104 - 46823
               </a>
             </div>
           </section>
@@ -175,7 +175,7 @@ const subjectOptions = [
             >
               <div>
                 <h3 class="text-lg font-black text-slate-950">
-                  Sportanlage Grünstraße
+                  Sportplatz Grünstraße
                 </h3>
 
                 <p class="mt-1 text-slate-600">

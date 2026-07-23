@@ -14,7 +14,7 @@ export const fanArticles: FanArticle[] = [
         value: '#305CDE',
       },
     ],
-    badge: 'Jubiläum',
+    badges: ['Jubiläum','NEU'],
   },
   {
     id: 'badeschlappen',
@@ -45,7 +45,7 @@ export const fanArticles: FanArticle[] = [
         value: '#305CDE',
       },
     ],
-    badge: 'NEU',
+    badges: ['NEU'],
     material: '70 % Baumwolle, 30 % Polyester',
   },
   {
@@ -216,7 +216,7 @@ export const fanArticles: FanArticle[] = [
       },
     ],
     material: '100 % Baumwolle',
-    badge: 'Sonderpreis',
+    badges: ['Sonderpreis'],
   },
   {
     id: 'fan-schal',
