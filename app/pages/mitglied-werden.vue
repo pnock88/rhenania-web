@@ -5,24 +5,67 @@ useSeoMeta({
     'Mitglied beim SC Rhenania Hochdahl werden und Teil unserer Vereinsgemeinschaft sein.',
 })
 
+type RegistrationType = 'initial' | 'transfer'
+type Gender = 'male' | 'female' | 'diverse'
+
 type MembershipForm = {
-  firstName: string
-  lastName: string
-  email: string
-  phone: string
+  registrationType: RegistrationType
+  previousClub: string
+
+  playerLastName: string
+  playerFirstName: string
+  gender: Gender | ''
+  playerStreet: string
+  playerZip: string
+  playerCity: string
   birthDate: string
-  membershipType: string
+  birthPlace: string
+  nationality: string
+
+  guardianLastName: string
+  guardianFirstName: string
+  guardianStreet: string
+  guardianZip: string
+  guardianCity: string
+  guardianEmail: string
+  guardianPhone: string
+
+  accountHolder: string
+  iban: string
+  bankName: string
+
+  team: string
   message: string
   privacyAccepted: boolean
 }
 
 const createInitialForm = (): MembershipForm => ({
-  firstName: '',
-  lastName: '',
-  email: '',
-  phone: '',
+  registrationType: 'initial',
+  previousClub: '',
+
+  playerLastName: '',
+  playerFirstName: '',
+  gender: '',
+  playerStreet: '',
+  playerZip: '',
+  playerCity: '',
   birthDate: '',
-  membershipType: '',
+  birthPlace: '',
+  nationality: '',
+
+  guardianLastName: '',
+  guardianFirstName: '',
+  guardianStreet: '',
+  guardianZip: '',
+  guardianCity: '',
+  guardianEmail: '',
+  guardianPhone: '',
+
+  accountHolder: '',
+  iban: '',
+  bankName: '',
+
+  team: '',
   message: '',
   privacyAccepted: false,
 })
@@ -74,47 +117,89 @@ const memberships = [
   },
 ]
 
-const membershipOptions = memberships.map(item => ({
-  label: item.name,
-  value: item.name,
-}))
-
 const submitForm = async () => {
   successMessage.value = ''
   errorMessage.value = ''
 
+  if (
+    form.registrationType === 'transfer'
+    && !form.previousClub.trim()
+  ) {
+    errorMessage.value =
+      'Bitte gib bei einem Vereinswechsel den bisherigen Verein an.'
+    return
+  }
+
   if (!form.privacyAccepted) {
-    errorMessage.value = 'Bitte bestätige die Datenschutzerklärung.'
+    errorMessage.value =
+      'Bitte bestätige die Datenschutzerklärung.'
     return
   }
 
   isSubmitting.value = true
 
   try {
-    const response = await $fetch<{ message: string }>(
+    const response = await $fetch<{
+      message: string
+      requestNumber: string
+    }>(
       '/api/membership-request',
       {
         method: 'POST',
-        body: form,
+        body: {
+          ...form,
+          iban: form.iban.replace(/\s/g, '').toUpperCase(),
+        },
       },
     )
 
-    successMessage.value = response.message
+    successMessage.value =`${response.message} Anmeldenummer: ${response.requestNumber}`
     Object.assign(form, createInitialForm())
   }
   catch (error: any) {
-    console.error('Mitgliedsanfrage:', error)
+    console.error('Mitgliedsanmeldung fehlgeschlagen.')
 
     errorMessage.value =
       error?.data?.statusMessage
       || error?.statusMessage
       || error?.message
-      || 'Die Anfrage konnte nicht gesendet werden.'
+      || 'Die Anmeldung konnte nicht gesendet werden.'
   }
   finally {
     isSubmitting.value = false
   }
 }
+
+const teamOptions = [
+  { label: 'Bitte Mannschaft auswählen', value: '' },
+  { label: 'I. Mannschaft', value: 'erste' },
+  { label: 'II. Mannschaft', value: 'zweite' },
+  { label: 'A-Junioren', value: 'a-junioren' },
+  { label: 'B1-Junioren', value: 'b1-junioren' },
+  { label: 'B2-Junioren', value: 'b2-junioren' },
+  { label: 'C1-Junioren', value: 'c1-junioren' },
+  { label: 'C2-Junioren', value: 'c2-junioren' },
+  { label: 'D1-Junioren', value: 'd1-junioren' },
+  { label: 'D2-Junioren', value: 'd2-junioren' },
+  { label: 'E1-Junioren', value: 'e1-junioren' },
+  { label: 'E2-Junioren', value: 'e2-junioren' },
+  { label: 'F1-Junioren', value: 'f1-junioren' },
+  { label: 'F2-Junioren', value: 'f2-junioren' },
+  { label: 'G-Junioren', value: 'g-junioren' },
+  { label: 'U11-Juniorinnen', value: 'u11-juniorinnen' },
+  { label: 'U13-Juniorinnen', value: 'u13-juniorinnen' },
+  { label: 'U15-Juniorinnen', value: 'u15-juniorinnen' },
+]
+
+const normalizedIban = computed({
+  get: () => form.iban,
+  set: (value: string) => {
+    form.iban = value
+      .replace(/\s/g, '')
+      .toUpperCase()
+      .slice(0, 34)
+  },
+})
 </script>
 
 <template>
@@ -294,103 +379,354 @@ const submitForm = async () => {
           </h2>
 
           <form
-  class="mt-9 space-y-6"
-  @submit.prevent="submitForm"
->
-  <BaseFormRow>
-    <BaseInput
-      v-model="form.firstName"
-      label="Vorname"
-      required
-      autocomplete="given-name"
-    />
+            class="mt-9 space-y-10"
+            @submit.prevent="submitForm"
+          >
+            <!-- Art der Anmeldung -->
+            <fieldset>
+              <legend class="text-xl font-black text-slate-950">
+                Art der Anmeldung
+              </legend>
 
-    <BaseInput
-      v-model="form.lastName"
-      label="Nachname"
-      required
-      autocomplete="family-name"
-    />
-  </BaseFormRow>
+              <div class="mt-5 grid gap-4 sm:grid-cols-2">
+                <label
+                  class="flex cursor-pointer items-center gap-3 rounded-2xl border p-5 transition"
+                  :class="
+                    form.registrationType === 'initial'
+                      ? 'border-blue-700 bg-blue-50'
+                      : 'border-slate-200 bg-white hover:border-slate-300'
+                  "
+                >
+                  <input
+                    v-model="form.registrationType"
+                    type="radio"
+                    value="initial"
+                    class="h-5 w-5 accent-blue-700"
+                  >
 
-  <BaseFormRow>
-    <BaseInput
-      v-model="form.email"
-      label="E-Mail-Adresse"
-      type="email"
-      required
-      autocomplete="email"
-    />
+                  <span class="font-bold text-slate-950">
+                    Erstanmeldung
+                  </span>
+                </label>
 
-    <BaseInput
-      v-model="form.phone"
-      label="Telefonnummer"
-      type="tel"
-      autocomplete="tel"
-      hint="Optional, erleichtert aber die Rückmeldung."
-    />
-  </BaseFormRow>
+                <label
+                  class="flex cursor-pointer items-center gap-3 rounded-2xl border p-5 transition"
+                  :class="
+                    form.registrationType === 'transfer'
+                      ? 'border-blue-700 bg-blue-50'
+                      : 'border-slate-200 bg-white hover:border-slate-300'
+                  "
+                >
+                  <input
+                    v-model="form.registrationType"
+                    type="radio"
+                    value="transfer"
+                    class="h-5 w-5 accent-blue-700"
+                  >
 
-  <BaseFormRow>
-    <BaseInput
-      v-model="form.birthDate"
-      label="Geburtsdatum"
-      type="date"
-      required
-    />
+                  <span class="font-bold text-slate-950">
+                    Vereinswechsel
+                  </span>
+                </label>
+              </div>
 
-    <BaseSelect
-      v-model="form.membershipType"
-      label="Mitgliedschaft"
-      :options="membershipOptions"
-      required
-    />
-  </BaseFormRow>
+              <div
+                v-if="form.registrationType === 'transfer'"
+                class="mt-5"
+              >
+                <BaseInput
+                  v-model="form.previousClub"
+                  label="Bisheriger Verein"
+                  required
+                  autocomplete="organization"
+                />
+              </div>
+            </fieldset>
 
-  <BaseTextarea
-    v-model="form.message"
-    label="Nachricht"
-    placeholder="Gibt es Fragen oder Hinweise zu deiner Mitgliedschaft?"
-    :rows="5"
-  />
+            <!-- Spielerdaten -->
+            <fieldset class="border-t border-slate-200 pt-9">
+              <legend class="text-2xl font-black text-slate-950">
+                Daten des Mitglieds
+              </legend>
 
-  <BaseCheckbox
-    v-model="form.privacyAccepted"
-    required
-  >
-    Ich stimme der Verarbeitung meiner Daten gemäß der
+              <p class="mt-2 text-sm leading-6 text-slate-500">
+                Bitte trage die persönlichen Angaben des anzumeldenden Mitglieds ein.
+              </p>
 
-    <NuxtLink
-      to="/datenschutz"
-      class="font-bold text-blue-700 hover:underline"
-    >
-      Datenschutzerklärung
-    </NuxtLink>
+              <div class="mt-6 space-y-6">
+                <BaseFormRow>
+                  <BaseInput
+                    v-model="form.playerFirstName"
+                    label="Vorname"
+                    required
+                    autocomplete="given-name"
+                  />
 
-    zu.
-  </BaseCheckbox>
+                  <BaseInput
+                    v-model="form.playerLastName"
+                    label="Nachname"
+                    required
+                    autocomplete="family-name"
+                  />
+                </BaseFormRow>
 
-  <BaseAlert
-    v-if="successMessage"
-    variant="success"
-  >
-    {{ successMessage }}
-  </BaseAlert>
+                <div>
+                  <p class="text-sm font-bold text-slate-700">
+                    Geschlecht *
+                  </p>
 
-  <BaseAlert
-    v-if="errorMessage"
-    variant="error"
-  >
-    {{ errorMessage }}
-  </BaseAlert>
+                  <div class="mt-3 flex flex-wrap gap-4">
+                    <label
+                      v-for="option in [
+                        { value: 'male', label: 'Männlich' },
+                        { value: 'female', label: 'Weiblich' },
+                        { value: 'diverse', label: 'Divers' },
+                      ]"
+                      :key="option.value"
+                      class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-3"
+                    >
+                      <input
+                        v-model="form.gender"
+                        type="radio"
+                        name="gender"
+                        :value="option.value"
+                        required
+                        class="h-4 w-4 accent-blue-700"
+                      >
 
-  <BaseButton
-    type="submit"
-    :disabled="isSubmitting"
-  >
-    {{ isSubmitting ? 'Wird gesendet …' : 'Anfrage absenden' }}
-  </BaseButton>
-</form>
+                      <span class="font-semibold text-slate-700">
+                        {{ option.label }}
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <BaseInput
+                  v-model="form.playerStreet"
+                  label="Straße und Hausnummer"
+                  required
+                  autocomplete="street-address"
+                />
+
+                <BaseFormRow>
+                  <BaseInput
+                    v-model="form.playerZip"
+                    label="PLZ"
+                    required
+                    inputmode="numeric"
+                    autocomplete="postal-code"
+                  />
+
+                  <BaseInput
+                    v-model="form.playerCity"
+                    label="Ort"
+                    required
+                    autocomplete="address-level2"
+                  />
+                </BaseFormRow>
+
+                <BaseFormRow>
+                  <BaseInput
+                    v-model="form.birthDate"
+                    label="Geburtsdatum"
+                    type="date"
+                    required
+                    autocomplete="bday"
+                  />
+
+                  <BaseInput
+                    v-model="form.birthPlace"
+                    label="Geburtsort"
+                    required
+                  />
+                </BaseFormRow>
+
+                <BaseInput
+                  v-model="form.nationality"
+                  label="Nationalität"
+                  required
+                  autocomplete="country-name"
+                />
+              </div>
+            </fieldset>
+
+            <!-- Erziehungsberechtigte -->
+            <fieldset class="border-t border-slate-200 pt-9">
+              <legend class="text-2xl font-black text-slate-950">
+                Daten der erziehungsberechtigten Person
+              </legend>
+
+              <p class="mt-2 text-sm leading-6 text-slate-500">
+                Bei volljährigen Mitgliedern können hier die eigenen Kontaktdaten
+                eingetragen werden.
+              </p>
+
+              <div class="mt-6 space-y-6">
+                <BaseFormRow>
+                  <BaseInput
+                    v-model="form.guardianFirstName"
+                    label="Vorname"
+                    required
+                    autocomplete="given-name"
+                  />
+
+                  <BaseInput
+                    v-model="form.guardianLastName"
+                    label="Nachname"
+                    required
+                    autocomplete="family-name"
+                  />
+                </BaseFormRow>
+
+                <BaseInput
+                  v-model="form.guardianStreet"
+                  label="Straße und Hausnummer"
+                  required
+                  autocomplete="street-address"
+                />
+
+                <BaseFormRow>
+                  <BaseInput
+                    v-model="form.guardianZip"
+                    label="PLZ"
+                    required
+                    inputmode="numeric"
+                    autocomplete="postal-code"
+                  />
+
+                  <BaseInput
+                    v-model="form.guardianCity"
+                    label="Ort"
+                    required
+                    autocomplete="address-level2"
+                  />
+                </BaseFormRow>
+
+                <BaseFormRow>
+                  <BaseInput
+                    v-model="form.guardianEmail"
+                    label="E-Mail-Adresse"
+                    type="email"
+                    required
+                    autocomplete="email"
+                  />
+
+                  <BaseInput
+                    v-model="form.guardianPhone"
+                    label="Telefonnummer"
+                    type="tel"
+                    required
+                    autocomplete="tel"
+                  />
+                </BaseFormRow>
+              </div>
+            </fieldset>
+
+            <!-- Kontodaten -->
+            <fieldset class="border-t border-slate-200 pt-9">
+              <legend class="text-2xl font-black text-slate-950">
+                Kontodaten
+              </legend>
+
+              <p class="mt-2 text-sm leading-6 text-slate-500">
+                Die Kontodaten werden für den Einzug der Mitgliedsbeiträge benötigt.
+              </p>
+
+              <div class="mt-6 space-y-6">
+                <BaseInput
+                  v-model="form.accountHolder"
+                  label="Kontoinhaber"
+                  required
+                  autocomplete="name"
+                />
+
+                <BaseInput
+                  v-model="normalizedIban"
+                  label="IBAN"
+                  required
+                  autocomplete="off"
+                  placeholder="DE00 0000 0000 0000 0000 00"
+                />
+
+                <BaseInput
+                  v-model="form.bankName"
+                  label="Kreditinstitut"
+                  required
+                  autocomplete="organization"
+                />
+              </div>
+            </fieldset>
+
+            <!-- Mannschaft -->
+            <fieldset class="border-t border-slate-200 pt-9">
+              <legend class="text-2xl font-black text-slate-950">
+                Sportliche Zuordnung
+              </legend>
+
+              <div class="mt-6 space-y-6">
+                <BaseSelect
+                  v-model="form.team"
+                  label="Mannschaft"
+                  :options="teamOptions"
+                  required
+                />
+
+                <BaseTextarea
+                  v-model="form.message"
+                  label="Bemerkung"
+                  placeholder="Weitere Angaben oder Hinweise zur Anmeldung"
+                  :rows="4"
+                />
+              </div>
+            </fieldset>
+
+            <!-- Datenschutz -->
+            <div class="border-t border-slate-200 pt-9">
+              <BaseCheckbox
+                v-model="form.privacyAccepted"
+                required
+              >
+                Ich stimme der Speicherung und Verarbeitung meiner Daten zum Zweck
+                der Vereinsanmeldung gemäß der
+
+                <NuxtLink
+                  to="/datenschutz"
+                  class="font-bold text-blue-700 hover:underline"
+                >
+                  Datenschutzerklärung
+                </NuxtLink>
+
+                zu.
+              </BaseCheckbox>
+            </div>
+
+            <BaseAlert
+              v-if="successMessage"
+              variant="success"
+              role="status"
+            >
+              {{ successMessage }}
+            </BaseAlert>
+
+            <BaseAlert
+              v-if="errorMessage"
+              variant="error"
+              role="alert"
+            >
+              {{ errorMessage }}
+            </BaseAlert>
+
+            <BaseButton
+              type="submit"
+              :disabled="isSubmitting"
+            >
+              {{
+                isSubmitting
+                  ? 'Anmeldung wird übermittelt …'
+                  : 'Mitgliedsanmeldung absenden'
+              }}
+            </BaseButton>
+          </form>
         </section>
       </div>
     </BaseSection>

@@ -12,6 +12,7 @@ const navigation = [
   { label: 'Spielplan', to: '/spielplan' },
   { label: 'Sponsoren', to: '/sponsoren' },
   { label: 'Kontakt', to: '/kontakt' },
+  { label: 'Fanshop', to: '/fanshop' },
 ]
 
 const isActive = (path: string) => {
