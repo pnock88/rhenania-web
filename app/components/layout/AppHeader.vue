@@ -1,18 +1,25 @@
 <script setup lang="ts">
 const route = useRoute()
 
+const searchQuery = ref(
+  typeof route.query.q === 'string'
+    ? route.query.q
+    : '',
+)
+
 const isMenuOpen = ref(false)
 const isScrolled = ref(false)
+const isSearchOpen = ref(false)
+const searchInput = ref<HTMLInputElement | null>(null)
 
 const navigation = [
-  { label: 'Start', to: '/' },
-  { label: 'Verein', to: '/verein' },
+  { label: 'Unser Verein', to: '/verein' },
   { label: 'Mannschaften', to: '/mannschaften' },
   { label: 'News', to: '/news' },
   { label: 'Spielplan', to: '/spielplan' },
   { label: 'Sponsoren', to: '/sponsoren' },
-  { label: 'Kontakt', to: '/kontakt' },
   { label: 'Fanshop', to: '/fanshop' },
+  { label: 'Kontakt', to: '/kontakt' },
 ]
 
 const isActive = (path: string) => {
@@ -27,9 +34,57 @@ const closeMenu = () => {
   isMenuOpen.value = false
 }
 
+const openSearch = async () => {
+  isSearchOpen.value = true
+
+  await nextTick()
+
+  searchInput.value?.focus()
+}
+
+const closeSearch = () => {
+  isSearchOpen.value = false
+  searchQuery.value = ''
+}
+
+const toggleSearch = () => {
+  if (isSearchOpen.value) {
+    closeSearch()
+    return
+  }
+
+  openSearch()
+}
+
+const submitSearch = async () => {
+  const query = searchQuery.value.trim()
+
+  if (!query) {
+    searchInput.value?.focus()
+    return
+  }
+
+  closeMenu()
+  isSearchOpen.value = false
+
+  await navigateTo({
+    path: '/suche',
+    query: {
+      q: query,
+    },
+  })
+}
+
 const handleScroll = () => {
   if (import.meta.client) {
     isScrolled.value = window.scrollY > 30
+  }
+}
+
+const handleEscape = (event: KeyboardEvent) => {
+  if (event.key === 'Escape') {
+    closeMenu()
+    closeSearch()
   }
 }
 
@@ -37,16 +92,35 @@ watch(
   () => route.fullPath,
   () => {
     closeMenu()
+
+    searchQuery.value =
+      typeof route.query.q === 'string'
+        ? route.query.q
+        : ''
+
+    isSearchOpen.value = route.path === '/suche'
+  },
+  {
+    immediate: true,
   },
 )
 
+watch(isMenuOpen, (open) => {
+  if (open) {
+    closeSearch()
+  }
+})
+
 onMounted(() => {
   handleScroll()
+
   window.addEventListener('scroll', handleScroll)
+  window.addEventListener('keydown', handleEscape)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', handleScroll)
+  window.removeEventListener('keydown', handleEscape)
 })
 </script>
 
@@ -54,7 +128,7 @@ onBeforeUnmount(() => {
   <header
     class="fixed inset-x-0 top-0 z-50 transition-all duration-300"
     :class="
-      isScrolled || isMenuOpen
+      isScrolled || isMenuOpen || isSearchOpen
         ? 'bg-slate-950/95 shadow-xl backdrop-blur-lg'
         : 'bg-transparent'
     "
@@ -118,37 +192,90 @@ onBeforeUnmount(() => {
 
         <!-- Desktop Actions -->
         <div class="hidden items-center gap-3 xl:flex">
-          <NuxtLink
-            to="/suche"
-            aria-label="Website durchsuchen"
-            title="Suche"
-            class="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 text-white transition hover:border-blue-400 hover:bg-white/10 hover:text-blue-300"
-            :class="
-              isActive('/suche')
-                ? 'border-blue-400 bg-white/10 text-blue-300'
-                : ''
-            "
+          <form
+            class="relative flex items-center"
+            role="search"
+            @submit.prevent="submitSearch"
           >
-            <svg
-              class="h-5 w-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
+            <div
+              class="flex items-center overflow-hidden rounded-full border transition-all duration-300 ease-out"
+              :class="
+                isSearchOpen
+                  ? 'w-[28rem] border-white/20 bg-white/10'
+                  : 'w-11 border-white/15 bg-transparent'
+              "
             >
-              <circle
-                cx="11"
-                cy="11"
-                r="7"
-              />
-              <path d="m20 20-4-4" />
-            </svg>
-          </NuxtLink>
+              <input
+                v-if="isSearchOpen"
+                ref="searchInput"
+                v-model="searchQuery"
+                type="search"
+                name="q"
+                placeholder="Website durchsuchen …"
+                autocomplete="off"
+                class="min-w-0 flex-1 bg-transparent px-4 py-2 text-sm text-white outline-none placeholder:text-slate-400"
+                aria-label="Website durchsuchen"
+              >
 
-          <BaseButton to="/mitglied-werden">
+              <button
+                v-if="isSearchOpen && searchQuery.trim()"
+                type="submit"
+                class="mr-1 flex h-9 shrink-0 items-center justify-center rounded-full bg-blue-700 px-4 text-xs font-black text-white transition hover:bg-blue-600"
+              >
+                Suchen
+              </button>
+
+              <button
+                type="button"
+                class="flex h-11 w-11 shrink-0 items-center justify-center text-white transition hover:text-blue-300"
+                :aria-label="
+                  isSearchOpen
+                    ? 'Suche schließen'
+                    : 'Suche öffnen'
+                "
+                :aria-expanded="isSearchOpen"
+                @click="toggleSearch"
+              >
+                <svg
+                  v-if="!isSearchOpen"
+                  class="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle
+                    cx="11"
+                    cy="11"
+                    r="7"
+                  />
+                  <path d="m20 20-4-4" />
+                </svg>
+
+                <svg
+                  v-else
+                  class="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m6 6 12 12M18 6 6 18" />
+                </svg>
+              </button>
+            </div>
+          </form>
+
+          <BaseButton
+            v-if="!isSearchOpen"
+            to="/mitglied-werden"
+          >
             Mitglied werden
           </BaseButton>
         </div>

@@ -82,7 +82,12 @@ const resultLabel = computed(() => {
       eyebrow="Aus dem Vereinsleben"
       title="Aktuelles"
       description="Neuigkeiten, Spielberichte und Geschichten rund um den SC Rhenania Hochdahl."
-      image="/images/news/news-1.jpg"
+      image="/images/herobanner/aktuelles.jpg"
+      :breadcrumbs="[
+        {
+          label: 'Aktuelles',
+        },
+      ]"
     />
 
     <!-- Ladezustand -->

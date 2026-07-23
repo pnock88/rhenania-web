@@ -20,19 +20,6 @@ const closeProductModal = () => {
   isProductModalOpen.value = false
 }
 
-type FanArticle = {
-  name: string
-  subtitle?: string
-  description?: string
-  price: string
-  oldPrice?: string
-  image: string
-  colors?: string
-  material?: string
-  sizes?: string
-  badge?: string
-}
-
 const orderEmail = 'bestellung@rhenania-hochdahl.de'
 
 const createMailLink = (article: FanArticle) => {
@@ -79,7 +66,12 @@ const openPreview = (image: string) => {
       title="Fanartikel für"
       highlight="echte Rhenanen."
       description="Zeige deine Verbundenheit zum SC Rhenania Hochdahl – auf dem Sportplatz, unterwegs und zu Hause."
-      image="/images/fanartikel/hero.jpg"
+      image="/images/herobanner/fanshop.jpg"
+      :breadcrumbs="[
+        {
+          label: 'Fanshop',
+        },
+      ]"
     >
       <template #actions>
         <BaseButton to="#sortiment">
@@ -115,13 +107,13 @@ const openPreview = (image: string) => {
           </h2>
 
           <p class="mt-5 max-w-3xl text-lg leading-8 text-slate-600">
-            Lege deine gewünschten Fanartikel einfach in den Warenkorb und sende deine Bestellung bequem über das integrierte Bestellformular ab. 
+            Lege deine gewünschten Fanartikel einfach in die Bestellliste und sende deine Anfrage bequem über das integrierte Formular ab. 
             Wir melden uns anschließend zeitnah bei dir, um Abholung und Bezahlung am Vereinsheim an der Grünstraße mit dir abzustimmen.
           </p>
 
           <p class="mt-4 max-w-3xl leading-7 text-slate-600">
             Viele Fanartikel sind auch in weiteren Größen oder Farben erhältlich. Sollte deine Wunschvariante nicht auswählbar sein, 
-            kannst du sie uns einfach im Bemerkungsfeld der Bestellung mitteilen.
+            kannst du sie uns einfach im Bemerkungsfeld der Anfrage mitteilen.
           </p>
         </div>
 

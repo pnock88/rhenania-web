@@ -326,7 +326,7 @@ const modalImage = computed(() => {
               :disabled="!hasRequiredSelection"
               @click="addSelectedItem"
             >
-              In den Warenkorb
+              Auf die Bestellliste nehmen
             </button>
 
             <p

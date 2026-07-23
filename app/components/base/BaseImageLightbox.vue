@@ -1,44 +1,44 @@
 <script setup lang="ts">
-const props = defineProps<{
-  open: boolean
-  src: string
-  alt?: string
-}>()
+  const props = defineProps<{
+    open: boolean
+    src: string
+    alt?: string
+  }>()
 
-const emit = defineEmits<{
-  close: []
-}>()
+  const emit = defineEmits<{
+    close: []
+  }>()
 
-const close = () => emit('close')
+  const close = () => emit('close')
 
-const onKeyDown = (event: KeyboardEvent) => {
-  if (event.key === 'Escape') {
-    close()
-  }
-}
-
-onMounted(() => {
-  window.addEventListener('keydown', onKeyDown)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKeyDown)
-})
-
-watch(
-  () => props.open,
-  (open) => {
-    if (import.meta.client) {
-      document.body.style.overflow = open ? 'hidden' : ''
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      close()
     }
-  },
-)
-
-onBeforeUnmount(() => {
-  if (import.meta.client) {
-    document.body.style.overflow = ''
   }
-})
+
+  onMounted(() => {
+    window.addEventListener('keydown', onKeyDown)
+  })
+
+  onBeforeUnmount(() => {
+    window.removeEventListener('keydown', onKeyDown)
+  })
+
+  watch(
+    () => props.open,
+    (open) => {
+      if (import.meta.client) {
+        document.body.style.overflow = open ? 'hidden' : ''
+      }
+    },
+  )
+
+  onBeforeUnmount(() => {
+    if (import.meta.client) {
+      document.body.style.overflow = ''
+    }
+  })
 </script>
 
 <template>
@@ -67,13 +67,13 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.lightbox-enter-active,
-.lightbox-leave-active {
-  transition: opacity .2s;
-}
+  .lightbox-enter-active,
+  .lightbox-leave-active {
+    transition: opacity .2s;
+  }
 
-.lightbox-enter-from,
-.lightbox-leave-to {
-  opacity: 0;
-}
+  .lightbox-enter-from,
+  .lightbox-leave-to {
+    opacity: 0;
+  }
 </style>

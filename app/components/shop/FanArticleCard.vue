@@ -233,6 +233,7 @@ const badgeClasses = (badge: string) => {
           type="button"
           class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-900 text-white transition hover:bg-blue-800"
           :aria-label="`${article.name} auswählen`"
+          :title="`${article.name} auswählen`"
           @click="emit('select', article)"
         >
           <svg
@@ -241,13 +242,12 @@ const badgeClasses = (badge: string) => {
             fill="none"
             stroke="currentColor"
             stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
           >
-            <circle cx="9" cy="20" r="1" />
-            <circle cx="19" cy="20" r="1" />
-            <path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L21 8H6" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9 5.25H7.5A2.25 2.25 0 0 0 5.25 7.5v11.25A2.25 2.25 0 0 0 7.5 21h9A2.25 2.25 0 0 0 18.75 18.75V7.5A2.25 2.25 0 0 0 16.5 5.25H15m-6 0a2.25 2.25 0 1 0 6 0m-6 0a2.25 2.25 0 0 1 6 0"
+            />
           </svg>
         </button>
       </div>

@@ -89,7 +89,7 @@ onBeforeUnmount(() => {
         v-if="isCartOpen"
         type="button"
         class="fixed inset-0 z-[90] bg-slate-950/60 backdrop-blur-sm"
-        aria-label="Warenkorb schließen"
+        aria-label="Bestellliste schließen"
         @click="closeCart"
       />
     </Transition>
@@ -99,7 +99,7 @@ onBeforeUnmount(() => {
       <aside
         v-if="isCartOpen"
         class="fixed bottom-0 right-0 top-0 z-[100] flex w-full max-w-xl flex-col bg-white shadow-2xl"
-        aria-label="Warenkorb"
+        aria-label="Bestellliste"
       >
         <!-- Kopfzeile -->
         <header
@@ -115,7 +115,7 @@ onBeforeUnmount(() => {
             <h2 class="mt-1 text-2xl font-black text-slate-950">
               {{
                 currentStep === 'cart'
-                  ? 'Warenkorb'
+                  ? 'Bestellliste'
                   : currentStep === 'order'
                     ? 'Bestellung'
                     : 'Bestellung abgeschlossen'
@@ -126,7 +126,7 @@ onBeforeUnmount(() => {
           <button
             type="button"
             class="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-2xl text-slate-700 transition hover:bg-slate-200"
-            aria-label="Warenkorb schließen"
+            aria-label="Bestellliste schließen"
             @click="closeCart"
           >
             ×
@@ -135,7 +135,7 @@ onBeforeUnmount(() => {
 
         <!-- Inhalt -->
         <div class="flex-1 overflow-y-auto px-5 py-5 sm:px-7">
-          <!-- Warenkorb -->
+          <!-- Bestellliste -->
           <template v-if="currentStep === 'cart'">
             <div v-if="items.length">
               <div class="space-y-5">
@@ -251,11 +251,11 @@ onBeforeUnmount(() => {
                 class="mt-6 text-sm font-bold text-slate-500 underline transition hover:text-red-600"
                 @click="clearCart"
               >
-                Warenkorb leeren
+                Bestellliste leeren
               </button>
             </div>
 
-            <!-- Leerer Warenkorb -->
+            <!-- Leere Bestellliste -->
             <div
               v-else
               class="flex min-h-[60vh] flex-col items-center justify-center text-center"
@@ -280,11 +280,11 @@ onBeforeUnmount(() => {
               </div>
 
               <h3 class="mt-5 text-2xl font-black text-slate-950">
-                Dein Warenkorb ist leer
+                Deine Bestellliste ist leer
               </h3>
 
               <p class="mt-3 max-w-sm leading-7 text-slate-600">
-                Wähle einen Fanartikel aus und lege ihn in den Warenkorb.
+                Wähle einen Fanartikel aus und lege ihn in die Bestellliste.
               </p>
 
               <button
@@ -372,7 +372,7 @@ onBeforeUnmount(() => {
             class="mt-5 flex min-h-14 w-full items-center justify-center rounded-xl bg-blue-700 px-6 font-black text-white transition hover:bg-blue-800"
             @click="openOrderForm"
           >
-            Bestellung fortsetzen
+            Anfrage fortsetzen
           </button>
 
           <p class="mt-3 text-center text-xs leading-5 text-slate-500">

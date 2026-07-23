@@ -216,7 +216,7 @@ export const fanArticles: FanArticle[] = [
       },
     ],
     material: '100 % Baumwolle',
-    badges: ['Sonderpreis'],
+    badges: ['Sonderpreis','reduziert'],
   },
   {
     id: 'fan-schal',

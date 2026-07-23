@@ -46,6 +46,18 @@ useSeoMeta({
 
 <template>
   <main>
+    <BasePageHero
+      :breadcrumbs="[
+        {
+          label: 'Aktuelles',
+          to: '/news',
+        },
+        {
+          label: article.title,
+        },
+      ]"
+    ></BasePageHero>
+
     <!-- Ladezustand -->
     <BaseSection
       v-if="pending"

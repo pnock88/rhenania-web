@@ -158,7 +158,12 @@ const submitForm = async () => {
       title="Partner der"
       highlight="Rhenania werden."
       description="Unterstütze unsere Mannschaften, unsere Nachwuchsarbeit und das Vereinsleben in Hochdahl."
-      image="/images/home/hero-team.jpg"
+      image="/images/herobanner/sponsoren.jpg"
+      :breadcrumbs="[
+        {
+          label: 'Sponsoren',
+        },
+      ]"
     >
       <template #actions>
         <BaseButton to="#anfrage">

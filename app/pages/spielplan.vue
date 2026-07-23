@@ -118,7 +118,12 @@ const filteredMatches = computed(() => {
       title="Spiele und"
       highlight="Ergebnisse."
       description="Alle kommenden Partien und vergangenen Ergebnisse unserer Mannschaften."
-      image="/images/teams/first-team.jpg"
+      image="/images/herobanner/spielplan.jpg"
+      :breadcrumbs="[
+        {
+          label: 'Spielplan',
+        },
+      ]"
     />
 
     <BaseSection class="bg-slate-50">

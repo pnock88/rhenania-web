@@ -14,26 +14,25 @@ onMounted(() => {
   <button
     type="button"
     class="fixed bottom-5 right-5 z-40 flex min-h-14 items-center gap-3 rounded-full bg-slate-950 px-5 font-black text-white shadow-2xl transition hover:-translate-y-1 hover:bg-blue-700"
-    aria-label="Warenkorb öffnen"
+    aria-label="Bestellliste öffnen"
     @click="openCart"
   >
     <svg
-      class="h-6 w-6"
+      class="h-5 w-5"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
       stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
     >
-      <circle cx="9" cy="20" r="1" />
-      <circle cx="19" cy="20" r="1" />
-      <path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L21 8H6" />
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M9 5.25H7.5A2.25 2.25 0 0 0 5.25 7.5v11.25A2.25 2.25 0 0 0 7.5 21h9A2.25 2.25 0 0 0 18.75 18.75V7.5A2.25 2.25 0 0 0 16.5 5.25H15m-6 0a2.25 2.25 0 1 0 6 0m-6 0a2.25 2.25 0 0 1 6 0"
+      />
     </svg>
 
     <span>
-      Warenkorb
+      Bestellliste
     </span>
 
     <span

@@ -1,54 +1,63 @@
 <script setup lang="ts">
-    interface Props {
-      eyebrow?: string
-      title: string
-      highlight?: string
-      description?: string
-      image?: string
-      imageAlt?: string
-      align?: 'left' | 'center'
-      size?: 'default' | 'compact'
-    }
+import type {
+  BreadcrumbAnchor,
+  BreadcrumbItem,
+} from '~/components/base/BaseBreadcrumb.vue'
 
-    withDefaults(defineProps<Props>(), {
-      eyebrow: undefined,
-      highlight: undefined,
-      description: undefined,
-      image: undefined,
-      imageAlt: '',
-      align: 'left',
-      size: 'default',
-    })
+interface Props {
+  eyebrow?: string
+  title: string
+  highlight?: string
+  description?: string
+  image?: string
+  imageAlt?: string
+  align?: 'left' | 'center'
+  size?: 'default' | 'compact'
+  breadcrumbs?: BreadcrumbItem[]
+  anchors?: BreadcrumbAnchor[]
+}
+
+withDefaults(defineProps<Props>(), {
+  eyebrow: undefined,
+  highlight: undefined,
+  description: undefined,
+  image: undefined,
+  imageAlt: '',
+  align: 'left',
+  size: 'default',
+  breadcrumbs: () => [],
+  anchors: () => [],
+})
 </script>
 
 <template>
   <section
-    class="relative overflow-hidden bg-slate-950 text-white"
+    class="relative flex max-h-[500px] min-h-[625px] items-center overflow-hidden bg-slate-950 text-white"
     :class="
       size === 'compact'
-        ? 'pb-16 pt-32 md:pb-20 md:pt-36'
-        : 'pb-24 pt-36 md:pb-32 md:pt-44'
+        ? 'py-28 md:py-32'
+        : 'py-32 md:py-36'
     "
   >
     <img
       v-if="image"
       :src="image"
       :alt="imageAlt"
-      class="absolute inset-0 h-full w-full object-cover opacity-30"
+      class="absolute inset-0 h-full w-full object-cover"
     >
 
     <div
-      class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-slate-950/40"
+      class="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/55 to-slate-950/20"
     />
 
     <BaseContainer>
       <div
         class="relative"
-        :class="[
+        :class="
           align === 'center'
             ? 'mx-auto max-w-4xl text-center'
-            : 'max-w-4xl',
-        ]"
+            : 'max-w-4xl'
+        "
       >
         <p
           v-if="eyebrow"
@@ -58,7 +67,7 @@
         </p>
 
         <h1
-          class="mt-5 text-5xl font-black leading-tight tracking-tight sm:text-6xl lg:text-7xl"
+          class="mt-5 text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl"
         >
           {{ title }}
 
@@ -72,7 +81,7 @@
 
         <p
           v-if="description"
-          class="mt-7 max-w-2xl text-lg leading-8 text-slate-200"
+          class="mt-6 max-w-2xl text-lg leading-8 text-slate-100"
           :class="align === 'center' ? 'mx-auto' : ''"
         >
           {{ description }}
@@ -80,12 +89,22 @@
 
         <div
           v-if="$slots.actions"
-          class="mt-9 flex flex-col gap-3 sm:flex-row"
+          class="mt-8 flex flex-col gap-3 sm:flex-row"
           :class="align === 'center' ? 'justify-center' : ''"
         >
           <slot name="actions" />
         </div>
       </div>
     </BaseContainer>
+  </section>
+
+  <section
+    v-if="breadcrumbs.length"
+    class="sticky top-20 z-40 border-b border-slate-200 bg-white/95 py-3 shadow-sm backdrop-blur"
+  >
+    <BaseBreadcrumb
+      :items="breadcrumbs"
+      :anchors="anchors"
+    />
   </section>
 </template>

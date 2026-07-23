@@ -1,29 +1,31 @@
 <script setup lang="ts">
-const buttons = [
-  {
-    label: 'Mitglied werden',
-    to: '/mitglied-werden',
-    variant: 'primary',
-  },
-  {
-    label: 'Probetraining',
-    to: '/probetraining',
-    variant: 'outline',
-  },
-  {
-    label: 'Spielplan',
-    to: '/spielplan',
-    variant: 'outline',
-  },
-] as const
+
+  /*<const buttons = [
+    {
+      label: 'Mitglied werden',
+      to: '/mitglied-werden',
+      variant: 'primary',
+    },
+    {
+      label: 'Probetraining',
+      to: '/probetraining',
+      variant: 'outline',
+    },
+    {
+      label: 'Spielplan',
+      to: '/spielplan',
+      variant: 'outline',
+    },
+  ] as const*/
+
 </script>
 
 <template>
   <section
-    class="relative min-h-[700px] overflow-hidden bg-slate-950 pt-20 text-white lg:min-h-[760px]"
+    class="relative min-h-[700px] overflow-hidden bg-slate-950 pt-20 text-white lg:min-h-[625px]"
   >
     <img
-      src="/images/home/hero-team.jpg"
+      src="/images/herobanner/hero-team.jpg"
       alt="Fußballmannschaft auf dem Vereinsgelände"
       class="absolute inset-0 h-full w-full object-cover object-center"
     >
@@ -38,7 +40,7 @@ const buttons = [
 
     <BaseContainer>
       <div
-        class="relative z-10 flex min-h-[620px] items-center py-20 lg:min-h-[680px]"
+        class="relative z-10 flex min-h-[620px] items-center py-20 lg:min-h-[400px]"
       >
         <div class="max-w-3xl">
           <p
@@ -51,13 +53,11 @@ const buttons = [
             class="text-5xl font-black leading-[0.98] tracking-tight sm:text-6xl lg:text-7xl"
           >
             Mehr als Fußball.
-
             <span class="block">
               Eine Gemeinschaft
             </span>
-
             <span class="block text-blue-500">
-              seit 1925.
+              seit 1925
             </span>
           </h1>
 

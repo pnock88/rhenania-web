@@ -89,9 +89,14 @@ const hasTeams = computed(() => teamGroups.value.length > 0)
     <BasePageHero
       eyebrow="Unsere Teams"
       title="Gemeinsam auf"
-      highlight="dem Platz."
+      highlight="dem Platz"
       description="Entdecke alle Mannschaften des SC Rhenania Hochdahl und finde das passende Team für dich."
-      image="/images/teams/first-team.jpg"
+      image="/images/herobanner/spielfeld.jpg"
+      :breadcrumbs="[
+        {
+          label: 'Mannschaften',
+        },
+      ]"
     >
       <template #actions>
         <BaseButton to="/probetraining">

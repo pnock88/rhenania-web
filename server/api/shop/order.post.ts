@@ -106,7 +106,7 @@ export default defineEventHandler(async (event) => {
   ) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Der Warenkorb ist leer.',
+      statusMessage: 'Die Bestellliste ist leer.',
     })
   }
 
@@ -114,7 +114,7 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 400,
       statusMessage:
-        'Der Warenkorb enthält zu viele Positionen.',
+        'Die Bestellliste enthält zu viele Positionen.',
     })
   }
 
@@ -135,7 +135,7 @@ export default defineEventHandler(async (event) => {
       throw createError({
         statusCode: 400,
         statusMessage:
-          'Der Warenkorb enthält ungültige Artikel.',
+          'Die Bestellliste enthält ungültige Artikel.',
       })
     }
 

@@ -1,0 +1,44 @@
+Rhenania WEB 
+
+TODO
+
+- Startseite schnell Panel
+- Sponsoren als Slider
+- Dynamisierung der Fanartikel
+- Dynamisierung Footer (Logo, FB, SoundCloudLogo SoundCloud?, Insta, Kontaktadresse)
+-- Probetraing, Download
+- Anmelde Formular - 2x Unterschrift
+- Download Seite (Passantrag, Förderverein, Satzung, Muster Kündigung)
+- Sponsoren (ausgegraut -> Hover in Farbe) 
+- Bildergalerie
+- Suche erweitern
+- Probetraing neben Formular auch die Plakate
+- Trainingsplan
+- Mannschaften mit links Tabelle, Spielplan, Pokal
+--> erste + zweite FUPA Widget Kader
+- Sponsoren (Auflistung der kleinen (weiteren) Sponsoren)
+-----> PDF Werbepartner
+--> Bei unterseiten einen Breadcrumb
+--> Ansprechpartner Kontaktform
+--> Mitglied werden --> Mannschaftsliste mit Trainern dynamisch
+--> vernüftige Hero Hintergrundbilder
+--> kontakt in Footer aufnehmen
+--> Kontakt
+-----> Hauptvorstand
+-----> Jugendvorstand
+-----> Trainer
+
+
+--> Formulare Mail versenden --> SMTP einrichten
+--> PDF schick machen
+
+IDEEN
+--> APP
+--> LIVETICKER
+
+--> Datenschutz überprüfen
+
+
+--> Integrations/Testsystem --> Hetzner
+
+--> Oberfläche Strapi

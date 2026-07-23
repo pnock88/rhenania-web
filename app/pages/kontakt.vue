@@ -2,7 +2,7 @@
 useSeoMeta({
   title: 'Kontakt | SC Rhenania Hochdahl',
   description:
-    'Kontakt, Ansprechpartner und Vereinsadresse des SC Rhenania Hochdahl 1925 e.V.',
+    'Kontakt, Ansprechpartner und Vereinsadressen des SC Rhenania Hochdahl 1925 e.V.',
 })
 
 type ContactForm = {
@@ -11,6 +11,24 @@ type ContactForm = {
   subject: string
   message: string
   privacyAccepted: boolean
+}
+
+type ContactPerson = {
+  name: string
+  role: string
+  email: string
+  image: string
+}
+
+type Location = {
+  id: string
+  name: string
+  street: string
+  zip: string
+  city: string
+  latitude: number
+  longitude: number
+  mapBbox: string
 }
 
 const createInitialForm = (): ContactForm => ({
@@ -27,7 +45,7 @@ const isSubmitting = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
 
-const contacts = [
+const contacts: ContactPerson[] = [
   {
     name: 'Max Mustermann',
     role: '1. Vorsitzender',
@@ -48,39 +66,28 @@ const contacts = [
   },
 ]
 
-const submitForm = async () => {
-  successMessage.value = ''
-  errorMessage.value = ''
-
-  if (!form.privacyAccepted) {
-    errorMessage.value = 'Bitte bestätige die Datenschutzerklärung.'
-    return
-  }
-
-  isSubmitting.value = true
-
-  try {
-    const response = await $fetch<{ message: string }>('/api/contact', {
-      method: 'POST',
-      body: form,
-    })
-
-    successMessage.value = response.message
-    Object.assign(form, createInitialForm())
-  }
-  catch (error: any) {
-    console.error('Kontaktformular:', error)
-
-    errorMessage.value =
-      error?.data?.statusMessage
-      || error?.statusMessage
-      || error?.message
-      || 'Die Nachricht konnte nicht gesendet werden.'
-  }
-  finally {
-    isSubmitting.value = false
-  }
-}
+const locations: Location[] = [
+  {
+    id: 'gruenstrasse',
+    name: 'Sportplatz Grünstraße',
+    street: 'Grünstraße 17',
+    zip: '40699',
+    city: 'Erkrath',
+    latitude: 51.206278,
+    longitude: 6.951715,
+    mapBbox: '6.949715,51.204278,6.953715,51.208278',
+  },
+  {
+    id: 'kemperdick',
+    name: 'Sportplatz Kemperdick',
+    street: 'Max-Planck-Straße 101',
+    zip: '40699',
+    city: 'Erkrath',
+    latitude: 51.200639,
+    longitude: 6.944023,
+    mapBbox: '6.941023,51.197639,6.947023,51.203639',
+  },
+]
 
 const subjectOptions = [
   {
@@ -104,6 +111,42 @@ const subjectOptions = [
     value: 'Spielbetrieb',
   },
 ]
+
+const submitForm = async () => {
+  successMessage.value = ''
+  errorMessage.value = ''
+
+  if (!form.privacyAccepted) {
+    errorMessage.value = 'Bitte bestätige die Datenschutzerklärung.'
+    return
+  }
+
+  isSubmitting.value = true
+
+  try {
+    const response = await $fetch<{ message: string }>('/api/contact', {
+      method: 'POST',
+      body: {
+        ...form,
+      },
+    })
+
+    successMessage.value = response.message
+    Object.assign(form, createInitialForm())
+  }
+  catch (error: any) {
+    console.error('Kontaktformular:', error)
+
+    errorMessage.value =
+      error?.data?.statusMessage
+      || error?.statusMessage
+      || error?.message
+      || 'Die Nachricht konnte nicht gesendet werden.'
+  }
+  finally {
+    isSubmitting.value = false
+  }
+}
 </script>
 
 <template>
@@ -112,100 +155,93 @@ const subjectOptions = [
       eyebrow="Wir sind für dich da"
       title="Kontakt"
       description="Du hast Fragen zu unseren Mannschaften, einer Mitgliedschaft oder zum Vereinsleben? Schreibe uns eine Nachricht."
-      image="/images/home/hero-team.jpg"
+      image="/images/herobanner/kontakt2.png"
+      image-alt="Sportanlage des SC Rhenania Hochdahl"
+      :breadcrumbs="[
+        {
+          label: 'Kontakt',
+        },
+      ]"
+      :anchors="[
+        {
+          label: 'Kontaktformular',
+          href: '#formular',
+        },
+        {
+          label: 'Sportanlagen',
+          href: '#sportanlagen',
+        },
+        {
+          label: 'Ansprechpartner',
+          href: '#ansprechpartner',
+        },
+      ]"
     />
 
-    <BaseSection class="bg-slate-50">
-      <div class="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
-        <aside class="space-y-6">
-          <section
-            class="rounded-3xl bg-slate-950 p-7 text-white shadow-xl sm:p-9"
+    <!-- Kontakt und Formular -->
+    <BaseSection class="scroll-mt-12 bg-slate-50" id="formular">
+      <div class="grid gap-8 lg:grid-cols-[0.75fr_1.25fr]">
+        <!-- Vereinsdaten -->
+        <aside
+          class="rounded-3xl bg-slate-950 p-7 text-white shadow-xl sm:p-8"
+        >
+          <p
+            class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-400"
           >
-            <p
-              class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-400"
-            >
-              Vereinsadresse
+            Vereinsadresse
+          </p>
+
+          <h2 class="mt-4 text-3xl font-black">
+            Sportplatz Grünstraße
+          </h2>
+
+          <address class="mt-5 not-italic leading-7 text-slate-300">
+            <p class="font-bold text-white">
+              SC Rhenania Hochdahl 1925 e.V.
             </p>
 
-            <h2 class="mt-4 text-3xl font-black">
-              Sportplatz Grünstrasse
-            </h2>
+            <p class="mt-2">
+              Grünstraße 17<br>
+              40699 Erkrath
+            </p>
+          </address>
 
-            <address class="mt-6 not-italic leading-8 text-slate-300">
-              <p class="font-bold text-white">
-                SC Rhenania Hochdahl 1925 e.V.
-              </p>
+          <dl class="mt-6 space-y-4">
+            <div>
+              <dt class="text-xs font-bold uppercase tracking-wide text-slate-400">
+                E-Mail
+              </dt>
 
-              <p class="mt-2">
-                Grünstrasse 17<br>
-                40699 Erkrath
-              </p>
-            </address>
-
-            <div class="mt-7 space-y-3">
-              Mail: <a
-                href="mailto:info@rhenania-hochdahl.de"
-                class="block font-bold text-blue-300 transition hover:text-white"
-              >
-                info@rhenania-hochdahl.de
-              </a>
-
-              Tel: <a
-                href="tel:+49210446823"
-                class="block font-bold text-blue-300 transition hover:text-white"
-              >
-                02104 - 46823
-              </a>
-            </div>
-          </section>
-
-          <section
-            class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
-          >
-            <iframe
-              title="SC Rhenania Hochdahl"
-              class="h-[420px] w-full"
-              loading="lazy"
-              src="https://www.openstreetmap.org/export/embed.html?bbox=6.949715%2C51.204278%2C6.953715%2C51.208278&layer=mapnik&marker=51.206278%2C6.951715"
-              style="border:0"
-            />
-
-            <div
-              class="relative z-10 border-t border-slate-200 bg-slate-50 p-6"
-            >
-              <div>
-                <h3 class="text-lg font-black text-slate-950">
-                  Sportplatz Grünstraße
-                </h3>
-
-                <p class="mt-1 text-slate-600">
-                  Grünstraße 17 · 40699 Erkrath
-                </p>
-              </div>
-
-              <div class="mt-5 flex flex-wrap gap-3">
-                <BaseButton
-                  to="https://www.openstreetmap.org/?mlat=51.206278&mlon=6.951715#map=17/51.206278/6.951715"
-                  external
-                  variant="outline"
-                  class="!border-slate-300 !bg-white !text-slate-950 hover:!border-blue-700 hover:!bg-blue-50 hover:!text-blue-700"
+              <dd class="mt-1">
+                <a
+                  href="mailto:info@rhenania-hochdahl.de"
+                  class="font-bold text-blue-300 transition hover:text-white"
                 >
-                  OpenStreetMap
-                </BaseButton>
-
-                <BaseButton
-                  to="https://www.google.com/maps/dir/?api=1&destination=Grünstraße+17,+40699+Erkrath"
-                  external
-                >
-                  Route planen
-                </BaseButton>
-              </div>
+                  info@rhenania-hochdahl.de
+                </a>
+              </dd>
             </div>
-          </section>
+
+            <div>
+              <dt class="text-xs font-bold uppercase tracking-wide text-slate-400">
+                Telefon
+              </dt>
+
+              <dd class="mt-1">
+                <a
+                  href="tel:+49210446823"
+                  class="font-bold text-blue-300 transition hover:text-white"
+                >
+                  02104 46823
+                </a>
+              </dd>
+            </div>
+          </dl>
         </aside>
 
+        <!-- Formular -->
         <section
-          class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-9"
+          class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
         >
           <p
             class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-700"
@@ -213,87 +249,125 @@ const subjectOptions = [
             Nachricht senden
           </p>
 
-          <h2 class="mt-4 text-4xl font-black text-slate-950">
+          <h2 class="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">
             Wie können wir helfen?
           </h2>
 
+          <p class="mt-3 leading-6 text-slate-600">
+            Schreibe uns einfach eine Nachricht – wir melden uns
+            schnellstmöglich bei dir.
+          </p>
+
           <form
-  class="mt-9 space-y-6"
-  @submit.prevent="submitForm"
->
-  <BaseFormRow>
-    <BaseInput
-      v-model="form.name"
-      label="Name"
-      required
-      autocomplete="name"
-    />
+            class="mt-7 space-y-5"
+            @submit.prevent="submitForm"
+          >
+            <BaseFormRow>
+              <BaseInput
+                v-model="form.name"
+                label="Name"
+                required
+                autocomplete="name"
+              />
 
-    <BaseInput
-      v-model="form.email"
-      label="E-Mail-Adresse"
-      type="email"
-      required
-      autocomplete="email"
-    />
-  </BaseFormRow>
+              <BaseInput
+                v-model="form.email"
+                label="E-Mail-Adresse"
+                type="email"
+                required
+                autocomplete="email"
+              />
+            </BaseFormRow>
 
-  <BaseSelect
-    v-model="form.subject"
-    label="Betreff"
-    :options="subjectOptions"
-    required
-  />
+            <BaseSelect
+              v-model="form.subject"
+              label="Betreff"
+              :options="subjectOptions"
+              required
+            />
 
-  <BaseTextarea
-    v-model="form.message"
-    label="Nachricht"
-    :rows="7"
-    required
-  />
+            <BaseTextarea
+              v-model="form.message"
+              label="Nachricht"
+              placeholder="Wie können wir dir helfen?"
+              :rows="5"
+              required
+            />
 
-  <BaseCheckbox
-    v-model="form.privacyAccepted"
-    required
-  >
-    Ich stimme der Verarbeitung meiner Angaben gemäß der
+            <BaseCheckbox
+              v-model="form.privacyAccepted"
+              required
+            >
+              Ich stimme der Verarbeitung meiner Angaben gemäß der
 
-    <NuxtLink
-      to="/datenschutz"
-      class="font-bold text-blue-700 hover:underline"
-    >
-      Datenschutzerklärung
-    </NuxtLink>
+              <NuxtLink
+                to="/datenschutz"
+                class="font-bold text-blue-700 hover:underline"
+              >
+                Datenschutzerklärung
+              </NuxtLink>
 
-    zu.
-  </BaseCheckbox>
+              zu.
+            </BaseCheckbox>
 
-  <BaseAlert
-    v-if="successMessage"
-    variant="success"
-  >
-    {{ successMessage }}
-  </BaseAlert>
+            <BaseAlert
+              v-if="successMessage"
+              variant="success"
+              role="status"
+            >
+              {{ successMessage }}
+            </BaseAlert>
 
-  <BaseAlert
-    v-if="errorMessage"
-    variant="error"
-  >
-    {{ errorMessage }}
-  </BaseAlert>
+            <BaseAlert
+              v-if="errorMessage"
+              variant="error"
+              role="alert"
+            >
+              {{ errorMessage }}
+            </BaseAlert>
 
-  <BaseButton
-    type="submit"
-    :disabled="isSubmitting"
-  >
-    {{ isSubmitting ? 'Wird gesendet …' : 'Nachricht absenden' }}
-  </BaseButton>
-</form>
+            <BaseButton
+              type="submit"
+              :disabled="isSubmitting"
+            >
+              {{
+                isSubmitting
+                  ? 'Wird gesendet …'
+                  : 'Nachricht absenden'
+              }}
+            </BaseButton>
+          </form>
         </section>
       </div>
     </BaseSection>
 
-    <BaseSection class="bg-white">
+    <!-- Sportanlagen -->
+    <BaseSection class="scroll-mt-12 bg-white" id="sportanlagen">
+      <div class="mb-10">
+        <p
+          class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-700"
+        >
+          Unsere Sportanlagen
+        </p>
+
+        <h2
+          class="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl"
+        >
+          So findest du uns
+        </h2>
+      </div>
+
+      <div class="grid gap-6 lg:grid-cols-2">
+        <LocationCard
+          v-for="location in locations"
+          :key="location.id"
+          :location="location"
+        />
+      </div>
+    </BaseSection>
+
+    <!-- Ansprechpartner -->
+    <BaseSection class="scroll-mt-12 bg-slate-50" id="ansprechpartner">
       <div class="mb-10">
         <p
           class="text-sm font-extrabold uppercase tracking-[0.25em] text-blue-700"
@@ -308,7 +382,7 @@ const subjectOptions = [
         </h2>
       </div>
 
-      <div class="grid gap-6 md:grid-cols-3">
+      <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         <ContactPersonCard
           v-for="contact in contacts"
           :key="contact.email"

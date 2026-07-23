@@ -54,7 +54,7 @@ export const useCart = () => {
     }
     catch (error) {
       console.error(
-        'Der gespeicherte Warenkorb konnte nicht geladen werden:',
+        'Die gespeicherte Bestellliste konnte nicht geladen werden:',
         error,
       )
     }

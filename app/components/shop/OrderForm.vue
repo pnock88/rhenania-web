@@ -38,7 +38,7 @@ const submitOrder = async () => {
   successMessage.value = ''
 
   if (!items.value.length) {
-    errorMessage.value = 'Dein Warenkorb ist leer.'
+    errorMessage.value = 'Deine Bestellliste ist leer.'
     return
   }
 
@@ -99,7 +99,7 @@ const submitOrder = async () => {
       @click="emit('back')"
     >
       <span aria-hidden="true">←</span>
-      Zurück zum Warenkorb
+      Zurück zur Bestellliste
     </button>
 
     <div>
