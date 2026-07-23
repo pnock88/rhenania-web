@@ -13,7 +13,7 @@ onMounted(() => {
 <template>
   <button
     type="button"
-    class="fixed bottom-5 right-5 z-40 flex min-h-14 items-center gap-3 rounded-full bg-slate-950 px-5 font-black text-white shadow-2xl transition hover:-translate-y-1 hover:bg-blue-700"
+    class="fixed bottom-5 right-5 z-40 flex min-h-14 items-center gap-3 rounded-full bg-slate-950 px-5 font-black text-white shadow-2xl transition hover:-translate-y-1 hover:bg-blue-800 border border-white/60"
     aria-label="Bestellliste öffnen"
     @click="openCart"
   >

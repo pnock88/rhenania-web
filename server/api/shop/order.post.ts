@@ -181,13 +181,13 @@ export default defineEventHandler(async (event) => {
     config.shopOrderEmail ?? '',
   ).trim()
 
-  if (!recipient) {
+  /*if (!recipient) {
     throw createError({
       statusCode: 500,
       statusMessage:
         'Für Bestellungen ist keine Empfängeradresse konfiguriert.',
     })
-  }
+  }*/
 
   try {
     const pdf = await createShopOrderPdf(order)
@@ -201,7 +201,8 @@ export default defineEventHandler(async (event) => {
     await writeFile(pdfPath, pdf)
 
     console.log('PDF gespeichert:', pdfPath)
-    /*await sendShopOrderMails({
+    /*await 
+    ({
       order,
       pdf,
       recipient,
@@ -229,7 +230,7 @@ export default defineEventHandler(async (event) => {
         && Boolean(config.smtp.password)
         && Boolean(config.smtp.fromEmail)
 
-        if (smtpConfigured) {
+        if (recipient && smtpConfigured) {
         await sendShopOrderMails({
             order,
             pdf,

@@ -1,30 +1,53 @@
-export type FanArticleImage = {
+export interface FanArticleImage {
   src: string
-  alt?: string
+  alt: string
   color?: string
 }
 
-export type FanArticleColor = {
+export interface FanArticleColor {
   name: string
   value: string
+  image?: string
 }
 
-export type FanArticle = {
+export interface FanArticleBadge {
+  id: string
+  label: string
+  backgroundColor: string
+  textColor: string
+}
+
+export interface FanArticleCategory {
   id: string
   name: string
-  subtitle?: string
-  description?: string
-  price: number
-  oldPrice?: number
-  image: string
-  images?: FanArticleImage[]
-  colors?: FanArticleColor[]
-  material?: string
-  sizes?: string[]
-  badges?: string[]
+  slug: string
 }
 
-export type CartItem = {
+export interface FanArticle {
+  id: string
+  slug: string
+  name: string
+
+  subtitle?: string
+  description?: string
+  material?: string
+
+  price: number
+  oldPrice?: number
+
+  image: string
+  images?: FanArticleImage[]
+
+  sizes?: string[]
+  colors?: FanArticleColor[]
+  badges?: FanArticleBadge[]
+  categories?: FanArticleCategory[]
+
+  stock: number
+  highlight: boolean
+}
+
+export interface CartItem {
   cartId: string
   productId: string
   name: string
@@ -36,25 +59,7 @@ export type CartItem = {
   color?: string
 }
 
-export type OrderCustomer = {
-  firstName: string
-  lastName: string
-  street: string
-  zip: string
-  city: string
-  email: string
-  phone: string
-  note?: string
-  privacyAccepted: boolean
-}
-
-export type ShopOrder = {
-  customer: OrderCustomer
-  items: CartItem[]
-  total: number
-}
-
-export type AddToCartInput = {
+export interface AddToCartInput {
   product: FanArticle
   quantity?: number
   size?: string

@@ -6,8 +6,16 @@ import type {
 const STORAGE_KEY = 'rhenania-fanartikel-cart'
 
 export const useCart = () => {
-  const items = useState<CartItem[]>('fanartikel-cart', () => [])
-  const isCartOpen = useState<boolean>('fanartikel-cart-open', () => false)
+  const items = useState<CartItem[]>(
+    'fanartikel-cart',
+    () => [],
+  )
+
+  const isCartOpen = useState<boolean>(
+    'fanartikel-cart-open',
+    () => false,
+  )
+
   const isInitialized = useState<boolean>(
     'fanartikel-cart-initialized',
     () => false,
@@ -37,18 +45,23 @@ export const useCart = () => {
   }
 
   const initializeCart = () => {
-    if (!import.meta.client || isInitialized.value) {
+    if (
+      !import.meta.client
+      || isInitialized.value
+    ) {
       return
     }
 
     try {
-      const storedCart = localStorage.getItem(STORAGE_KEY)
+      const storedCart =
+        localStorage.getItem(STORAGE_KEY)
 
       if (storedCart) {
-        const parsedCart = JSON.parse(storedCart)
+        const parsedCart: unknown =
+          JSON.parse(storedCart)
 
         if (Array.isArray(parsedCart)) {
-          items.value = parsedCart
+          items.value = parsedCart as CartItem[]
         }
       }
     }
@@ -70,7 +83,8 @@ export const useCart = () => {
     color,
     image,
   }: AddToCartInput) => {
-    const safeQuantity = Math.max(1, quantity)
+    const selectedImage =
+      image || product.image
 
     const cartId = createCartId(
       product.id,
@@ -83,27 +97,33 @@ export const useCart = () => {
     )
 
     if (existingItem) {
-      existingItem.quantity += safeQuantity
+      existingItem.quantity += quantity
+      existingItem.image = selectedImage
+
+      saveCart()
+      isCartOpen.value = true
+      return
     }
-    else {
-      items.value.push({
-        cartId,
-        productId: product.id,
-        name: product.name,
-        subtitle: product.subtitle,
-        image: image ?? product.image,
-        price: product.price,
-        quantity: safeQuantity,
-        size,
-        color,
-      })
-    }
+
+    items.value.push({
+      cartId,
+      productId: product.id,
+      name: product.name,
+      subtitle: product.subtitle,
+      price: product.price,
+      quantity,
+      size,
+      color,
+      image: selectedImage,
+    })
 
     saveCart()
     isCartOpen.value = true
   }
 
-  const removeItem = (cartId: string) => {
+  const removeItem = (
+    cartId: string,
+  ) => {
     items.value = items.value.filter(
       item => item.cartId !== cartId,
     )
@@ -116,7 +136,8 @@ export const useCart = () => {
     quantity: number,
   ) => {
     const item = items.value.find(
-      currentItem => currentItem.cartId === cartId,
+      currentItem =>
+        currentItem.cartId === cartId,
     )
 
     if (!item) {
@@ -132,28 +153,40 @@ export const useCart = () => {
     saveCart()
   }
 
-  const increaseQuantity = (cartId: string) => {
+  const increaseQuantity = (
+    cartId: string,
+  ) => {
     const item = items.value.find(
-      currentItem => currentItem.cartId === cartId,
+      currentItem =>
+        currentItem.cartId === cartId,
     )
 
     if (!item) {
       return
     }
 
-    setQuantity(cartId, item.quantity + 1)
+    setQuantity(
+      cartId,
+      item.quantity + 1,
+    )
   }
 
-  const decreaseQuantity = (cartId: string) => {
+  const decreaseQuantity = (
+    cartId: string,
+  ) => {
     const item = items.value.find(
-      currentItem => currentItem.cartId === cartId,
+      currentItem =>
+        currentItem.cartId === cartId,
     )
 
     if (!item) {
       return
     }
 
-    setQuantity(cartId, item.quantity - 1)
+    setQuantity(
+      cartId,
+      item.quantity - 1,
+    )
   }
 
   const clearCart = () => {
@@ -170,12 +203,14 @@ export const useCart = () => {
   }
 
   const toggleCart = () => {
-    isCartOpen.value = !isCartOpen.value
+    isCartOpen.value =
+      !isCartOpen.value
   }
 
   const itemCount = computed(() => {
     return items.value.reduce(
-      (sum, item) => sum + item.quantity,
+      (sum, item) =>
+        sum + item.quantity,
       0,
     )
   })
@@ -183,16 +218,21 @@ export const useCart = () => {
   const subtotal = computed(() => {
     return items.value.reduce(
       (sum, item) =>
-        sum + item.price * item.quantity,
+        sum
+        + item.price
+        * item.quantity,
       0,
     )
   })
 
   const formattedSubtotal = computed(() => {
-    return new Intl.NumberFormat('de-DE', {
-      style: 'currency',
-      currency: 'EUR',
-    }).format(subtotal.value)
+    return new Intl.NumberFormat(
+      'de-DE',
+      {
+        style: 'currency',
+        currency: 'EUR',
+      },
+    ).format(subtotal.value)
   })
 
   return {
